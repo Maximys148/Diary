@@ -1,0 +1,21 @@
+spring:
+  mvc:
+    view:
+      prefix: "/WEB-INF/jsp/"
+      suffix: ".jsp"
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    user-name: "postgres"
+    password: "Max.2005"
+    url: "jdbc:postgresql://localhost:5432/Diary"
+    hikari:
+      jdbc-url: "${spring.datasource.url}"
+  data:
+    jdbc:
+      dialect: postgresql
+  jpa:
+    hibernate:
+      ddl-auto: update
+
+server:
+  port: 8090
