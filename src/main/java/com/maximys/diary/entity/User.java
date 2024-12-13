@@ -4,21 +4,20 @@ import jakarta.persistence.*;
 import org.hibernate.annotations.GenericGenerator;
 
 @Entity
-@Table(name = "client")
-public class Client {
+@Table(name = "t_user")
+public class User {
     @Id
-    @GenericGenerator(name = "id_client", strategy = "com.maximys.diary.generator.StringIdGenerator")
-    @GeneratedValue(generator = "id_client", strategy = GenerationType.AUTO)
-    private String id;
+    @GeneratedValue(generator = "id_user", strategy = GenerationType.AUTO)
+    private Long id;
     private String userName;
     private String email;
     private String password;
 
-    public String getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(String id) {
+    public void setId(Long id) {
         this.id = id;
     }
 
