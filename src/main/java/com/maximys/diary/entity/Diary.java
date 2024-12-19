@@ -2,7 +2,7 @@ package com.maximys.diary.entity;
 
 import jakarta.persistence.*;
 
-import java.time.LocalDate;
+import java.util.Date;
 
 @Entity
 @Table(name = "diary")
@@ -15,8 +15,10 @@ public class Diary {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    private LocalDate date;
     private String event;
+    private Date createDate; // Дата создания события
+    private int reminderFrequency; // Частота напоминания (например, каждый день, неделю и т.д.)
+    private int leadTime; // За какое время до события напоминать
 
     public Long getId() {
         return id;
@@ -34,13 +36,6 @@ public class Diary {
         this.user = user;
     }
 
-    public LocalDate getDate() {
-        return date;
-    }
-
-    public void setDate(LocalDate date) {
-        this.date = date;
-    }
 
     public String getNotes() {
         return event;
@@ -50,5 +45,35 @@ public class Diary {
         this.event = event;
     }
 
-    // Getters and Setters
+    public String getEvent() {
+        return event;
+    }
+
+    public void setEvent(String event) {
+        this.event = event;
+    }
+
+    public Date getCreateDate() {
+        return createDate;
+    }
+
+    public void setCreateDate(Date createDate) {
+        this.createDate = createDate;
+    }
+
+    public int getReminderFrequency() {
+        return reminderFrequency;
+    }
+
+    public void setReminderFrequency(int reminderFrequency) {
+        this.reminderFrequency = reminderFrequency;
+    }
+
+    public int getLeadTime() {
+        return leadTime;
+    }
+
+    public void setLeadTime(int leadTime) {
+        this.leadTime = leadTime;
+    }
 }

@@ -12,7 +12,7 @@ public class UserService {
         this.userRepository = userRepository;
     }
 
-    public boolean validateUser(String password, String email){
+    /*public boolean validateUser(String password, String email){
         // Есть ли почта в БД
         if(userRepository.existsByEmail(email)){
             User user = userRepository.findByEmail(email);
@@ -23,14 +23,14 @@ public class UserService {
             return false;
         }
         return false;
-    }
+    }*/
 
-    public boolean saveUser(User user){
+    /*public boolean saveUser(User user){
         if(!userRepository.existsByEmail(user.getEmail())){
             userRepository.save(user);
             return true;
         }
         return false;
-    }
+    }*/
 
 }

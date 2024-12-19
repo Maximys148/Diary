@@ -24,7 +24,7 @@ public class AuthRegController {
         return "registration"; // Шаблон для страницы регистрации
     }
 
-    @PostMapping("/register")
+    /*@PostMapping("/register")
     public String registerUser(@ModelAttribute User user, Model model) {
         // Проверка на наличие пользователя и сохранение его в базе данных
         if (userService.validateUser(user.getPassword(), user.getEmail())) {
@@ -34,5 +34,5 @@ public class AuthRegController {
 
         userService.saveUser(user); // Сохранение пользователя
         return "redirect:/home"; // Перенаправление на главную страницу
-    }
+    }*/
 }

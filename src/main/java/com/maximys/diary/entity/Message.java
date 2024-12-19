@@ -1,6 +1,9 @@
 package com.maximys.diary.entity;
 
+import com.maximys.diary.enums.SendStatus;
 import jakarta.persistence.*;
+
+import java.util.Date;
 
 @Entity
 @Table(name = "message")
@@ -9,14 +12,25 @@ public class Message {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String content;
+    private SendStatus sendStatus;
 
-    @ManyToOne
+    @OneToOne
     @JoinColumn(name = "sender_email_id", nullable = false)
     private Email sender;
 
     @ManyToOne
-    @JoinColumn(name = "receiver_id", nullable = false)
+    @JoinColumn(name = "receiver_email_id", nullable = false)
     private Email receiver;
+    private Date createdDate;
+    private Date updatedDate;
+
+    public SendStatus getSendStatus() {
+        return sendStatus;
+    }
+
+    public void setSendStatus(SendStatus sendStatus) {
+        this.sendStatus = sendStatus;
+    }
 
     public Long getId() {
         return id;
@@ -50,4 +64,20 @@ public class Message {
         this.receiver = receiver;
     }
 
+
+    public Date getCreatedDate() {
+        return createdDate;
+    }
+
+    public void setCreatedDate(Date createdDate) {
+        this.createdDate = createdDate;
+    }
+
+    public Date getUpdatedDate() {
+        return updatedDate;
+    }
+
+    public void setUpdatedDate(Date updatedDate) {
+        this.updatedDate = updatedDate;
+    }
 }

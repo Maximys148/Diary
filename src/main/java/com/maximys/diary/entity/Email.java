@@ -8,7 +8,7 @@ public class Email {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String email;
+    private String address;
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
@@ -22,12 +22,12 @@ public class Email {
         this.id = id;
     }
 
-    public String getEmail() {
-        return email;
+    public String getAddress() {
+        return address;
     }
 
-    public void setEmail(String email) {
-        this.email = email;
+    public void setAddress(String address) {
+        this.address = address;
     }
 
     public User getUser() {
