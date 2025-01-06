@@ -6,17 +6,14 @@ import java.util.Date;
 
 @Entity
 @Table(name = "diary")
-public class Diary {
+public class Diary extends TimeEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
-
     private String event;
-    private Date createDate; // Дата создания события
     private int reminderFrequency; // Частота напоминания (например, каждый день, неделю и т.д.)
     private int leadTime; // За какое время до события напоминать
 
@@ -36,7 +33,6 @@ public class Diary {
         this.user = user;
     }
 
-
     public String getNotes() {
         return event;
     }
@@ -51,14 +47,6 @@ public class Diary {
 
     public void setEvent(String event) {
         this.event = event;
-    }
-
-    public Date getCreateDate() {
-        return createDate;
-    }
-
-    public void setCreateDate(Date createDate) {
-        this.createDate = createDate;
     }
 
     public int getReminderFrequency() {

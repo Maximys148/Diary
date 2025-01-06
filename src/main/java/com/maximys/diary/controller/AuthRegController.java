@@ -1,38 +1,50 @@
 package com.maximys.diary.controller;
 
-import com.maximys.diary.entity.User;
-import com.maximys.diary.service.UserService;
+import com.maximys.diary.dto.LoginDTO;
+import com.maximys.diary.dto.RegistrationDTO;
+import com.maximys.diary.service.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.servlet.ModelAndView;
 
 @Controller
+@RequestMapping(value = "/start")
 public class AuthRegController {
     @Autowired
-    private UserService userService;
+    private AuthService authService;
 
-    public AuthRegController(UserService userService) {
-        this.userService = userService;
+    public AuthRegController(AuthService authService) {
+        this.authService = authService;
     }
 
-    @GetMapping("/register")
-    public String showRegistrationForm(Model model) {
-        model.addAttribute("user", new User());
-        return "registration"; // Шаблон для страницы регистрации
+    @GetMapping(value = "/register")
+    public ModelAndView showRegistrationForm(ModelAndView model) {
+        model.setViewName("register");
+        model.addObject("registrationDto", new RegistrationDTO());
+        return model;
     }
 
-    /*@PostMapping("/register")
-    public String registerUser(@ModelAttribute User user, Model model) {
-        // Проверка на наличие пользователя и сохранение его в базе данных
-        if (userService.validateUser(user.getPassword(), user.getEmail())) {
-            model.addAttribute("message", "Пароль или почта указаны неверно, либо они заняты другим пользователем");
-            return "registration"; // Возвращаем на страницу регистрации
-        }
+    @PostMapping("/register")
+    public String registerUser(RegistrationDTO registrationDto) {
+      //  authService.register(registrationDto);
+        return "redirect:/auth/login";
+    }
 
-        userService.saveUser(user); // Сохранение пользователя
-        return "redirect:/home"; // Перенаправление на главную страницу
-    }*/
+    @GetMapping("/login")
+    public String showLoginForm(Model model) {
+        model.addAttribute("loginDto", new LoginDTO());
+        return "login";
+    }
+
+    @PostMapping("/login")
+    public String loginUser(LoginDTO loginDto) {
+      //  if (authService.login(loginDto)) {
+       //     return "redirect:/home";
+       // }
+        return "redirect:/auth/login?error=true";
+    }
 }
