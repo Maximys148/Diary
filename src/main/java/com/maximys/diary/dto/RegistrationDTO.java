@@ -7,21 +7,29 @@ import jakarta.persistence.OneToMany;
 import java.util.List;
 
 public class RegistrationDTO {
+    private String nickName;
+    private String password;
     private String firstName;
     private String lastName;
     private String middleName;
-    private String password;
-    private Email email;
 
-    public RegistrationDTO(String firstName, String lastName, String middleName, String password, Email email) {
+    public RegistrationDTO(String nickName,String password, String firstName, String lastName, String middleName, String email) {
+        this.nickName = nickName;
+        this.password = password;
         this.firstName = firstName;
         this.lastName = lastName;
         this.middleName = middleName;
-        this.password = password;
-        this.email = email;
     }
 
     public RegistrationDTO() {
+    }
+
+    public String getNickName() {
+        return nickName;
+    }
+
+    public void setNickName(String nickName) {
+        this.nickName = nickName;
     }
 
     public String getFirstName() {
@@ -56,11 +64,4 @@ public class RegistrationDTO {
         this.password = password;
     }
 
-    public Email getEmail() {
-        return email;
-    }
-
-    public void setEmail(Email email) {
-        this.email = email;
-    }
 }

@@ -3,6 +3,7 @@ package com.maximys.diary.controller;
 import com.maximys.diary.dto.LoginDTO;
 import com.maximys.diary.dto.RegistrationDTO;
 import com.maximys.diary.service.AuthService;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -30,21 +31,25 @@ public class AuthRegController {
 
     @PostMapping("/register")
     public String registerUser(RegistrationDTO registrationDto) {
-      //  authService.register(registrationDto);
-        return "redirect:/auth/login";
+        if(authService.saveUser(registrationDto)){
+            return "redirect:/start/login";
+        }
+        return "Пользователь с таким никнеймом уже есть";
     }
 
     @GetMapping("/login")
-    public String showLoginForm(Model model) {
-        model.addAttribute("loginDto", new LoginDTO());
-        return "login";
+    public ModelAndView showLoginForm(ModelAndView model){
+        model.setViewName("login");
+        model.addObject("loginDto", new LoginDTO());
+        return model;
     }
 
     @PostMapping("/login")
-    public String loginUser(LoginDTO loginDto) {
-      //  if (authService.login(loginDto)) {
-       //     return "redirect:/home";
-       // }
+    public String loginUser(LoginDTO loginDto, HttpSession session) {
+        if (authService.login(loginDto)) {
+            session.setAttribute("user", loginDto);
+            return "redirect:/main/main";
+        }
         return "redirect:/auth/login?error=true";
     }
 }

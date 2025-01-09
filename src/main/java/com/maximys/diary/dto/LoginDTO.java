@@ -1,43 +1,23 @@
 package com.maximys.diary.dto;
 
 public class LoginDTO {
-    private String firstName;
-    private String lastName;
-    private String middleName;
+    private String nickName;
     private String password;
 
-    public LoginDTO(String firstName, String lastName, String middleName, String password) {
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.middleName = middleName;
+    public LoginDTO(String nickName, String password) {
+        this.nickName = nickName;
         this.password = password;
     }
 
     public LoginDTO() {
     }
 
-    public String getFirstName() {
-        return firstName;
+    public String getNickName() {
+        return nickName;
     }
 
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
-    }
-
-    public String getLastName() {
-        return lastName;
-    }
-
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
-    }
-
-    public String getMiddleName() {
-        return middleName;
-    }
-
-    public void setMiddleName(String middleName) {
-        this.middleName = middleName;
+    public void setNickName(String nickName) {
+        this.nickName = nickName;
     }
 
     public String getPassword() {

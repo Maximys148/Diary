@@ -1,5 +1,6 @@
 package com.maximys.diary.entity;
 
+import com.maximys.diary.dto.RegistrationDTO;
 import jakarta.persistence.*;
 import org.hibernate.annotations.GenericGenerator;
 
@@ -13,12 +14,40 @@ public class User {
     @Id
     @GeneratedValue(generator = "id_user", strategy = GenerationType.AUTO)
     private Long id;
+    private String nickName;
     private String firstName;
     private String lastName;
     private String middleName;
     private String password;
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<Email> emails;
+
+    public User(String nickName, String firstName, String lastName, String middleName, String password, List<Email> emails) {
+        this.nickName = nickName;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.middleName = middleName;
+        this.password = password;
+        this.emails = emails;
+    }
+    public User(RegistrationDTO dto){
+        this.nickName = dto.getNickName();
+        this.firstName = dto.getFirstName();
+        this.lastName = dto.getLastName();
+        this.middleName = dto.getMiddleName();
+        this.password = dto.getPassword();
+    }
+
+    public User() {
+    }
+
+    public String getNickName() {
+        return nickName;
+    }
+
+    public void setNickName(String nickName) {
+        this.nickName = nickName;
+    }
 
     public List<Email> getEmails() {
         return emails;

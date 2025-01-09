@@ -2,11 +2,11 @@
 <%@taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <html>
 <head>
-    <title>Регистрация</title>
+    <title>События</title>
 </head>
 <body>
-    <h2>Регистрация</h2>
-    <form action="${pageContext.request.contextPath}/start/register" method="post">
+    <h2>Твои события</h2>
+    <form action="${pageContext.request.contextPath}/main/event" method="post">
         <input type="text" name="nickName" placeholder="Никнейм" required>
         <input type="text" name="firstName" placeholder="Имя" required>
         <input type="text" name="lastName" placeholder="Фамилия" required>

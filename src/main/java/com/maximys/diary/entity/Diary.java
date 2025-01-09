@@ -13,7 +13,8 @@ public class Diary extends TimeEntity {
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
-    private String event;
+    private String name;
+    private String date;
     private int reminderFrequency; // Частота напоминания (например, каждый день, неделю и т.д.)
     private int leadTime; // За какое время до события напоминать
 
@@ -33,20 +34,20 @@ public class Diary extends TimeEntity {
         this.user = user;
     }
 
-    public String getNotes() {
-        return event;
+    public String getName() {
+        return name;
     }
 
-    public void setNotes(String event) {
-        this.event = event;
+    public void setName(String name) {
+        this.name = name;
     }
 
-    public String getEvent() {
-        return event;
+    public String getDate() {
+        return date;
     }
 
-    public void setEvent(String event) {
-        this.event = event;
+    public void setDate(String date) {
+        this.date = date;
     }
 
     public int getReminderFrequency() {

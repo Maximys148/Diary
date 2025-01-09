@@ -1,5 +1,6 @@
 package com.maximys.diary.service;
 
+import com.maximys.diary.dto.LoginDTO;
 import com.maximys.diary.entity.User;
 import com.maximys.diary.repository.UserRepository;
 import org.springframework.stereotype.Service;
@@ -10,6 +11,14 @@ public class UserService {
 
     public UserService(UserRepository userRepository) {
         this.userRepository = userRepository;
+    }
+
+    public User getUser(LoginDTO dto){
+        if(userRepository.findByNickName(dto.getNickName()) != null){
+            User byNickName = userRepository.findByNickName(dto.getNickName());
+            return byNickName;
+        }
+        return null;
     }
 
     /*public boolean validateUser(String password, String email){

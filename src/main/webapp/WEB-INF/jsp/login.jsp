@@ -6,8 +6,8 @@
 </head>
 <body>
     <h2>Авторизация</h2>
-    <form action="${pageContext.request.contextPath}/auth/login" method="post">
-        <input type="text" name="username" placeholder="Имя пользователя" required>
+    <form action="${pageContext.request.contextPath}/start/login" method="post">
+        <input type="text" name="nickName" placeholder="Никнейм" required>
         <input type="password" name="password" placeholder="Пароль" required>
         <button type="submit">Войти</button>
     </form>
