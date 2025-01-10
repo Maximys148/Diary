@@ -34,7 +34,7 @@ public class AuthRegController {
         if(authService.saveUser(registrationDto)){
             return "redirect:/start/login";
         }
-        return "Пользователь с таким никнеймом уже есть";
+        return"redirect:/start/register";
     }
 
     @GetMapping("/login")
@@ -50,6 +50,6 @@ public class AuthRegController {
             session.setAttribute("user", loginDto);
             return "redirect:/main/main";
         }
-        return "redirect:/auth/login?error=true";
+        return "redirect:/start/login";
     }
 }

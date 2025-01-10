@@ -56,5 +56,10 @@
             <artifactId>jakarta.servlet.jsp.jstl</artifactId>
             <version>3.0.1</version>
         </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.datatype</groupId>
+            <artifactId>jackson-datatype-jsr310</artifactId>
+            <version>2.12.3</version> <!-- используйте ту же версию, что и для jackson-databind -->
+        </dependency>
     </dependencies>
 </project>

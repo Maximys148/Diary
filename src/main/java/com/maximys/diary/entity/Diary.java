@@ -1,5 +1,6 @@
 package com.maximys.diary.entity;
 
+import com.maximys.diary.dto.EventDTO;
 import jakarta.persistence.*;
 
 import java.util.Date;
@@ -14,9 +15,31 @@ public class Diary extends TimeEntity {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
     private String name;
-    private String date;
+    private String data;
+    private Date dateTime;
     private int reminderFrequency; // Частота напоминания (например, каждый день, неделю и т.д.)
     private int leadTime; // За какое время до события напоминать
+
+    public Diary(User user, String name, String data, Date dateTime, int reminderFrequency, int leadTime) {
+        this.user = user;
+        this.name = name;
+        this.data = data;
+        this.dateTime = dateTime;
+        this.reminderFrequency = reminderFrequency;
+        this.leadTime = leadTime;
+    }
+
+    public Diary(EventDTO eventDTO) {
+        this.user = eventDTO.getUser();
+        this.name = eventDTO.getName();
+        this.data = eventDTO.getData();
+        this.dateTime = eventDTO.getDateTime();
+        this.reminderFrequency = eventDTO.getReminderFrequency();
+        this.leadTime = eventDTO.getLeadTime();
+    }
+
+    public Diary() {
+    }
 
     public Long getId() {
         return id;
@@ -42,12 +65,12 @@ public class Diary extends TimeEntity {
         this.name = name;
     }
 
-    public String getDate() {
-        return date;
+    public String getData() {
+        return data;
     }
 
-    public void setDate(String date) {
-        this.date = date;
+    public void setData(String data) {
+        this.data = data;
     }
 
     public int getReminderFrequency() {
@@ -64,5 +87,13 @@ public class Diary extends TimeEntity {
 
     public void setLeadTime(int leadTime) {
         this.leadTime = leadTime;
+    }
+
+    public Date getDateTime() {
+        return dateTime;
+    }
+
+    public void setDateTime(Date dateTime) {
+        this.dateTime = dateTime;
     }
 }

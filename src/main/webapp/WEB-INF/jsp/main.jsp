@@ -50,18 +50,38 @@
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.0.7/dist/umd/popper.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 <script src='https://unpkg.com/fullcalendar@5.10.2/main.js'></script>
+
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+        // Преобразуйте события в формат JSON
+        var events = ${events}; // Здесь events уже в формате JSON
+
         var calendarEl = document.getElementById('calendar');
         var calendar = new FullCalendar.Calendar(calendarEl, {
             initialView: 'dayGridMonth',
-            events: [
-                // Пример: события, полученные от бизнес логики и базы данных
-                // Здесь вы можете динамически генерировать массив событий на основе данных пользователя
-                { title: 'Занято', date: '2023-10-01', className: 'busy-day' },
-                { title: 'Свободно', date: '2023-10-02', className: 'free-day' },
-                // Добавьте более событий
-            ]
+            events: function(fetchInfo, successCallback) {
+                var allEvents = [];
+
+                // Добавьте занятости из объекта events
+                events.forEach(event => {
+
+                    allEvents.push({ title: event.name, date: event.dateTime.split('T')[0], className: 'busy-day' });
+                });
+
+                var startDate = fetchInfo.start;
+                var endDate = fetchInfo.end;
+                var date = startDate;
+
+                while (date < endDate) {
+                    var dateString = date.toISOString().split('T')[0];
+                    if (!allEvents.some(event => event.date === dateString)) {
+                        allEvents.push({ title: 'Свободно', date: dateString, className: 'free-day' });
+                    }
+                    date.setDate(date.getDate() + 1);
+                }
+
+                successCallback(allEvents);
+            }
         });
         calendar.render();
     });
