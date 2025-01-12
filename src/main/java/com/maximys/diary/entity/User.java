@@ -2,7 +2,6 @@ package com.maximys.diary.entity;
 
 import com.maximys.diary.dto.RegistrationDTO;
 import jakarta.persistence.*;
-import org.hibernate.annotations.GenericGenerator;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -56,7 +55,6 @@ public class User {
     public void setEmails(List<Email> emails) {
         this.emails = emails;
     }
-
     public Long getId() {
         return id;
     }

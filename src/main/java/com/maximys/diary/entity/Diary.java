@@ -1,6 +1,7 @@
 package com.maximys.diary.entity;
 
 import com.maximys.diary.dto.EventDTO;
+import com.maximys.diary.enums.UnitTime;
 import jakarta.persistence.*;
 
 import java.util.Date;
@@ -16,17 +17,20 @@ public class Diary extends TimeEntity {
     private User user;
     private String name;
     private String data;
-    private Date dateTime;
+    private Date dateTime; // Дата запланированного события
     private int reminderFrequency; // Частота напоминания (например, каждый день, неделю и т.д.)
     private int leadTime; // За какое время до события напоминать
+    @Enumerated(EnumType.STRING)
+    private UnitTime unitTime; // Единица измерения
 
-    public Diary(User user, String name, String data, Date dateTime, int reminderFrequency, int leadTime) {
+    public Diary(User user, String name, String data, Date dateTime, int reminderFrequency, int leadTime, UnitTime unitTime) {
         this.user = user;
         this.name = name;
         this.data = data;
         this.dateTime = dateTime;
         this.reminderFrequency = reminderFrequency;
         this.leadTime = leadTime;
+        this.unitTime = unitTime;
     }
 
     public Diary(EventDTO eventDTO) {
@@ -36,6 +40,7 @@ public class Diary extends TimeEntity {
         this.dateTime = eventDTO.getDateTime();
         this.reminderFrequency = eventDTO.getReminderFrequency();
         this.leadTime = eventDTO.getLeadTime();
+        this.unitTime = eventDTO.getUnitTime();
     }
 
     public Diary() {
@@ -95,5 +100,13 @@ public class Diary extends TimeEntity {
 
     public void setDateTime(Date dateTime) {
         this.dateTime = dateTime;
+    }
+
+    public UnitTime getUnitTime() {
+        return unitTime;
+    }
+
+    public void setUnitTime(UnitTime unitTime) {
+        this.unitTime = unitTime;
     }
 }

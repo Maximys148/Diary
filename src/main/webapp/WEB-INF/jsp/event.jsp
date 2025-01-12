@@ -32,7 +32,7 @@
             Создать событие
         </button>
 
-         <div class="event-list">
+        <div class="event-list">
             <c:choose>
                 <c:when test="${not empty events}">
                     <c:forEach var="event" items="${events}">
@@ -41,7 +41,48 @@
                             <span>Описание: ${event.data}</span><br>
                             <span>Дата: ${event.dateTime}</span><br>
                             <span>Частота напоминания: ${event.reminderFrequency}</span><br>
-                            <span>Напомнить за: ${event.leadTime}</span>
+                            <span>Напомнить за:
+                                <c:set var="leadTime" value="${event.leadTime}" />
+                                <c:set var="unitTime" value="${event.unitTime}" />
+
+                                <c:choose>
+                                    <c:when test="${unitTime == 'DAY'}">
+                                        ${leadTime}
+                                        <c:choose>
+                                            <c:when test="${leadTime % 10 == 1 && leadTime % 100 != 11}">день</c:when>
+                                            <c:when test="${leadTime % 10 >= 2 && leadTime % 10 <= 4 && (leadTime % 100 < 10 || leadTime % 100 >= 20)}">дня</c:when>
+                                            <c:otherwise>дней</c:otherwise>
+                                        </c:choose>
+                                    </c:when>
+                                    <c:when test="${unitTime == 'HOUR'}">
+                                        ${leadTime}
+                                        <c:choose>
+                                            <c:when test="${leadTime % 10 == 1 && leadTime % 100 != 11}">час</c:when>
+                                            <c:when test="${leadTime % 10 >= 2 && leadTime % 10 <= 4 && (leadTime % 100 < 10 || leadTime % 100 >= 20)}">часа</c:when>
+                                            <c:otherwise>часов</c:otherwise>
+                                        </c:choose>
+                                    </c:when>
+                                    <c:when test="${unitTime == 'MINUTE'}">
+                                        ${leadTime}
+                                        <c:choose>
+                                            <c:when test="${leadTime % 10 == 1 && leadTime % 100 != 11}">минута</c:when>
+                                            <c:when test="${leadTime % 10 >= 2 && leadTime % 10 <= 4 && (leadTime % 100 < 10 || leadTime % 100 >= 20)}">минуты</c:when>
+                                            <c:otherwise>минут</c:otherwise>
+                                        </c:choose>
+                                    </c:when>
+                                    <c:when test="${unitTime == 'WEEK'}">
+                                        ${leadTime}
+                                        недель
+                                    </c:when>
+                                    <c:when test="${unitTime == 'MONTH'}">
+                                        ${leadTime}
+                                        месяцев
+                                    </c:when>
+                                    <c:otherwise>
+                                        ${leadTime} ${unitTime}
+                                    </c:otherwise>
+                                </c:choose>
+                            </span>
                         </div>
                     </c:forEach>
                 </c:when>
@@ -49,7 +90,7 @@
                     <p>У вас пока нет событий. Создайте первое событие!</p>
                 </c:otherwise>
             </c:choose>
-         </div>
+        </div>
     </div>
 </div>
 
@@ -74,17 +115,25 @@
                         <textarea class="form-control" id="data" name="data" rows="5" required></textarea>
                     </div>
                     <div class="form-group">
-                        <label for="dateTime">Дата события</label>
-                        <input type="date" class="form-control" id="dateTime" name="dateTime" required>
+                        <label for="dateTime">Дата и время события</label>
+                        <input type="datetime-local" class="form-control" id="dateTime" name="dateTime" required>
                     </div>
                     <div class="form-group">
-                        <label for="reminderFrequency">Частота напоминания</label>
+                        <label for="reminderFrequency">Сколько раз напомнить</label>
                         <input type="text" class="form-control" id="reminderFrequency" name="reminderFrequency">
                     </div>
                     <div class="form-group">
-                        <label for="leadTime">Напомнить за (время)</label>
-                        <input type="text" class="form-control" id="leadTime" name="leadTime">
+                        <label for="leadTime">За какое время до наступления события напомнить</label>
+                        <input type="text" class="form-control" id="leadTime" name="leadTime" required>
                     </div>
+                    <label for="unitTime">Единица измерения:</label>
+                    <select id="unitTime" name="unitTime" class="form-control">
+                        <option value="MINUTE">Минуты</option>
+                        <option value="HOUR">Часы</option>
+                        <option value="DAY">Дни</option>
+                        <option value="WEEK">Недели</option>
+                        <option value="MONTH">Месяцы</option>
+                    </select>
                     <button type="submit" class="btn btn-primary">Создать событие</button>
                 </form>
             </div>

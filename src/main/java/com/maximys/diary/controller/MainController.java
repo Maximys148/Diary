@@ -5,10 +5,13 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.maximys.diary.dto.EventDTO;
 import com.maximys.diary.dto.LoginDTO;
+import com.maximys.diary.dto.RegistrationDTO;
 import com.maximys.diary.entity.User;
 import com.maximys.diary.service.DiaryService;
 import com.maximys.diary.service.UserService;
 import jakarta.servlet.http.HttpSession;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,6 +22,7 @@ import org.springframework.web.servlet.ModelAndView;
 @Controller
 @RequestMapping(value = "/main")
 public class MainController {
+    Logger logger = LoggerFactory.getLogger(MainController.class);
     @Autowired
     private DiaryService diaryService;
     @Autowired
@@ -61,6 +65,16 @@ public class MainController {
         model.setViewName("profile");
         return model;
     }
+    @PostMapping("/profile")
+    public String registerUser(String email, HttpSession session) {
+        LoginDTO loginDTO = (LoginDTO) session.getAttribute("user");
+        User userInfo = userService.getUser(loginDTO);
+        if(userService.createAndLinkEmailToUser(userInfo.getNickName(), email)){
+            return "redirect:/start/profile";
+        }
+        return"redirect:/start/profile";
+    }
+
 
     // Добавление события
     @GetMapping("/event")

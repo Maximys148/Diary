@@ -34,9 +34,9 @@
     <div class="sidebar bg-light p-3 border-right">
         <h4>Функции сайта</h4>
         <ul class="list-unstyled">
-            <li><a href="/main/email">Проверка почты</a></li>
+            <li><a href="/main/email">Почта</a></li>
             <li><a href="/main/profile">Профиль</a></li>
-            <li><a href="/main/event">Свои события</a></li>
+            <li><a href="/main/event">Мои события</a></li>
         </ul>
     </div>
 
@@ -79,7 +79,6 @@
                     }
                     date.setDate(date.getDate() + 1);
                 }
-
                 successCallback(allEvents);
             }
         });

@@ -14,6 +14,11 @@ public class Email {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
+    public Email(String address, User user) {
+        this.address = address;
+        this.user = user;
+    }
+
     public Long getId() {
         return id;
     }
