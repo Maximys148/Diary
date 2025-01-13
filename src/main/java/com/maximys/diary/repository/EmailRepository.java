@@ -5,4 +5,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface EmailRepository extends JpaRepository<Email, String> {
     Email findByAddress(String address);
+    boolean existsByAddress(String address);
 }

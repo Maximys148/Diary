@@ -62,6 +62,7 @@ public class MainController {
         model.addObject("firstName", userInfo.getFirstName());
         model.addObject("lastName", userInfo.getLastName());
         model.addObject("middleName", userInfo.getMiddleName());
+        model.addObject("emails", userInfo.getEmails());
         model.setViewName("profile");
         return model;
     }
@@ -70,9 +71,11 @@ public class MainController {
         LoginDTO loginDTO = (LoginDTO) session.getAttribute("user");
         User userInfo = userService.getUser(loginDTO);
         if(userService.createAndLinkEmailToUser(userInfo.getNickName(), email)){
-            return "redirect:/start/profile";
+            logger.info(loginDTO.getNickName() + ", успешно обновил профиль");
+            return "redirect:/main/profile";
         }
-        return"redirect:/start/profile";
+        logger.error(loginDTO.getNickName() + ", не смог обновить профиль");
+        return"redirect:/main/profile";
     }
 
 

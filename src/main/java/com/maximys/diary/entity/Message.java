@@ -1,3 +1,4 @@
+/*
 package com.maximys.diary.entity;
 
 import com.maximys.diary.enums.SendStatus;
@@ -17,12 +18,15 @@ public class Message extends TimeEntity{
     private SendStatus sendStatus;
 
     @OneToOne
-    @JoinColumn(name = "sender_email_id", nullable = false)
+    @JoinColumn(name = "sender_message_email_id", nullable = false)
     private Email sender;
 
     @OneToMany
-    @JoinColumn(name = "receiver_email_id", nullable = false)
+    @JoinColumn(name = "receiver_message_email_id", nullable = false)
     private List<Email> receiver;
+
+    public Message() {
+    }
 
     public SendStatus getSendStatus() {
         return sendStatus;
@@ -64,3 +68,4 @@ public class Message extends TimeEntity{
         this.receiver = receiver;
     }
 }
+*/

@@ -11,12 +11,15 @@ public class Email {
     private String address;
 
     @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
+    @JoinColumn(name = "receiver_email_id", nullable = false)
     private User user;
 
     public Email(String address, User user) {
         this.address = address;
         this.user = user;
+    }
+
+    public Email() {
     }
 
     public Long getId() {

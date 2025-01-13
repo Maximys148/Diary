@@ -89,12 +89,10 @@ public class NotificationService {
 
     private void showPopupNotification(Diary diary, User user) {
         // Логика отображения всплывающего уведомления
-        System.out.println("Showing notification for diary entry: " + diary.getId() + " to user: " + user.getId());
     }
 
     private void sendEmailNotification(Diary diary, String email) {
         // Логика отправки email
-        System.out.println("Sending email for diary entry: " + diary.getId() + " to email: " + email);
     }
 
     public void shutdown() {

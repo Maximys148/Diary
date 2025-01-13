@@ -1,3 +1,4 @@
+/*
 package com.maximys.diary.service;
 
 import com.maximys.diary.repository.MessageRepository;
@@ -11,3 +12,4 @@ public class MessageService {
         this.messageRepository = messageRepository;
     }
 }
+*/

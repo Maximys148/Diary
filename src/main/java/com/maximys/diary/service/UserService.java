@@ -29,6 +29,9 @@ public class UserService {
     public boolean createAndLinkEmailToUser(String nickName, String emailAddress) {
         // Поиск пользователя по нику
         User user = userRepository.findByNickName(nickName);
+        if(emailRepository.existsByAddress(emailAddress)){
+            return false;
+        }
         if (user != null) {
             // Создание нового объекта Email
             Email newEmail = new Email(emailAddress, user); // Здесь мы подразумеваем, что User провязан в конструкторе

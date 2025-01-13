@@ -4,6 +4,8 @@ import com.maximys.diary.dto.LoginDTO;
 import com.maximys.diary.dto.RegistrationDTO;
 import com.maximys.diary.service.AuthService;
 import jakarta.servlet.http.HttpSession;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -17,6 +19,7 @@ import org.springframework.web.servlet.ModelAndView;
 public class AuthRegController {
     @Autowired
     private AuthService authService;
+    Logger logger = LoggerFactory.getLogger(MainController.class);
 
     public AuthRegController(AuthService authService) {
         this.authService = authService;
@@ -32,8 +35,10 @@ public class AuthRegController {
     @PostMapping("/register")
     public String registerUser(RegistrationDTO registrationDto) {
         if(authService.saveUser(registrationDto)){
+            logger.info(registrationDto.getNickName() + ", успешно зарегистрировался");
             return "redirect:/start/login";
         }
+        logger.error(registrationDto.getNickName() + ", не смог зарегистрироваться");
         return"redirect:/start/register";
     }
 
@@ -48,8 +53,10 @@ public class AuthRegController {
     public String loginUser(LoginDTO loginDto, HttpSession session) {
         if (authService.login(loginDto)) {
             session.setAttribute("user", loginDto);
+            logger.info(loginDto.getNickName() + ", успешно авторизовался");
             return "redirect:/main/main";
         }
+        logger.error(loginDto.getNickName() + ", не смог авторизовался");
         return "redirect:/start/login";
     }
 }
