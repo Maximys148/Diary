@@ -1,6 +1,9 @@
 package com.maximys.diary.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+
+import java.util.List;
 
 @Entity
 @Table(name = "email")
@@ -13,6 +16,10 @@ public class Email {
     @ManyToOne
     @JoinColumn(name = "receiver_email_id", nullable = false)
     private User user;
+
+    @OneToMany(mappedBy = "sender", cascade = CascadeType.ALL) // Изменено на "sender"
+    @JsonIgnore // Игнорируем, чтобы избежать циклической сериализации
+    private List<Message> messages; // Теперь корректно ссылается на отправленные сообщения
 
     public Email(String address, User user) {
         this.address = address;
@@ -44,6 +51,14 @@ public class Email {
 
     public void setUser(User user) {
         this.user = user;
+    }
+
+    public List<Message> getMessages() {
+        return messages;
+    }
+
+    public void setMessages(List<Message> messages) {
+        this.messages = messages;
     }
 }
 

@@ -23,11 +23,13 @@ public class AuthService {
     }
 
     public boolean login(LoginDTO dto){
-        if(userRepository.findByNickName(dto.getNickName()) != null){
-            if(userRepository.findByNickName(dto.getNickName()).getPassword().equals(dto.getPassword())){
+        User userByNickname = userRepository.findByNickName(dto.getNickName());
+        if(userByNickname != null){
+            if(userByNickname.getPassword().equals(dto.getPassword())){
                 return true;
             }
         }
         return false;
     }
 }
+

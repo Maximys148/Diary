@@ -32,7 +32,7 @@
         }
         .email-input button {
             padding: 10px;
-            background-color: lightblue; /* Изменен цвет фона кнопки */
+            background-color: #007BFF; /* Изменен цвет фона кнопки */
             color: white;
             border: none;
             border-radius: 5px;
@@ -40,24 +40,39 @@
             margin-top: 10px; /* Увеличен отступ сверху */
         }
         .email-input button:hover {
-            background-color: #4cae4c; /* Этот цвет можно оставить */
+            background-color: #0056b3; /* Этот цвет можно оставить */
         }
         .emails-list {
             margin: 20px 0;
         }
         .no-emails {
-            color: red; /* Цвет сообщения о необходимости заведения почты */
+            color: white; /* Цвет сообщения о необходимости заведения почты */
+        }
+        .button {
+            display: inline-block;
+            padding: 10px 20px;
+            font-size: 16px;
+            color: white;
+            background-color: #007BFF; /* Цвет кнопки */
+            border: none;
+            border-radius: 5px;
+            text-decoration: none; /* Без подчеркивания */
+        }
+        .button:hover {
+            background-color: #0056b3; /* Цвет кнопки при наведении */
         }
     </style>
 </head>
 <body>
+    <div>
+        <a href="${pageContext.request.contextPath}/main/main" class="button">Вернуться на главную</a>
+    </div>
     <div class="container">
         <h2>Ваш профиль</h2>
         <h3>Никнейм: ${nickName}</h3>
         <h3>Имя: ${firstName}</h3>
         <h3>Фамилия: ${lastName}</h3>
         <h3>Отчество: ${middleName}</h3>
-
         <!-- Список email-адресов пользователя -->
         <div class="emails-list">
             <h4>Ваши Email:</h4>
@@ -68,7 +83,7 @@
                     </c:forEach>
                 </c:if>
                 <c:if test="${empty emails}">
-                    <li class="no-emails">У вас нет зарегистрированных email-адресов. Рекомендуем завести почту!</li>
+                    <li class="no-emails">У вас нет зарегистрированных email-адресов. Рекомендуем завести почту для получения уведомлений о предстоящих событиях</li>
                 </c:if>
             </ul>
         </div>

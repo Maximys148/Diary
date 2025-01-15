@@ -1,5 +1,7 @@
 package com.maximys.diary.dto;
 
+import static com.maximys.diary.util.Password.hashPassword;
+
 public class LoginDTO {
     private String nickName;
     private String password;
@@ -21,7 +23,7 @@ public class LoginDTO {
     }
 
     public String getPassword() {
-        return password;
+        return hashPassword(password);
     }
 
     public void setPassword(String password) {

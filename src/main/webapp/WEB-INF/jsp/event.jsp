@@ -20,9 +20,25 @@
         .event-title {
             font-weight: bold;
         }
-    </style>
+        .button {
+            display: inline-block;
+            padding: 10px 20px;
+            font-size: 16px;
+            color: white;
+            background-color: #007BFF; /* Цвет кнопки */
+            border: none;
+            border-radius: 5px;
+            text-decoration: none; /* Без подчеркивания */
+        }
+        .button:hover {
+            background-color: #0056b3; /* Цвет кнопки при наведении */
+        }
+</style>
 </head>
 <body>
+<div>
+    <a href="${pageContext.request.contextPath}/main/main" class="button">Вернуться на главную</a>
+</div>
 
 <div class="container layout">
     <div class="content p-3">

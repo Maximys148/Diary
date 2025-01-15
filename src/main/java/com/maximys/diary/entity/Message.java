@@ -1,10 +1,8 @@
-/*
 package com.maximys.diary.entity;
 
 import com.maximys.diary.enums.SendStatus;
 import jakarta.persistence.*;
 
-import java.util.Date;
 import java.util.List;
 
 @Entity
@@ -14,16 +12,20 @@ public class Message extends TimeEntity{
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String content;
-    @Enumerated()
+    @Enumerated(EnumType.STRING)
     private SendStatus sendStatus;
 
-    @OneToOne
-    @JoinColumn(name = "sender_message_email_id", nullable = false)
-    private Email sender;
+    @ManyToOne
+    @JoinColumn(name = "sender_email_id", nullable = false)
+    private Email sender; // Email отправителя
 
-    @OneToMany
-    @JoinColumn(name = "receiver_message_email_id", nullable = false)
-    private List<Email> receiver;
+    @ManyToMany // Связь "Многие к Многим" с Email
+    @JoinTable(
+            name = "message_recipients", // Имя промежуточной таблицы
+            joinColumns = @JoinColumn(name = "message_id"), // Колонка для связи с message
+            inverseJoinColumns = @JoinColumn(name = "recipient_email_id") // Колонка для связи с получателями
+    )
+    private List<Email> recipients; // Список адресатов
 
     public Message() {
     }
@@ -60,12 +62,11 @@ public class Message extends TimeEntity{
         this.sender = sender;
     }
 
-    public List<Email> getReceiver() {
-        return receiver;
+    public List<Email> getRecipients() {
+        return recipients;
     }
 
-    public void setReceiver(List<Email> receiver) {
-        this.receiver = receiver;
+    public void setRecipients(List<Email> recipients) {
+        this.recipients = recipients;
     }
 }
-*/

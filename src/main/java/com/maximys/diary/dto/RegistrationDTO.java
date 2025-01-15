@@ -4,7 +4,11 @@ import com.maximys.diary.entity.Email;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.OneToMany;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.List;
+
+import static com.maximys.diary.util.Password.hashPassword;
 
 public class RegistrationDTO {
     private String nickName;
@@ -57,11 +61,10 @@ public class RegistrationDTO {
     }
 
     public String getPassword() {
-        return password;
+        return hashPassword(password);
     }
 
     public void setPassword(String password) {
         this.password = password;
     }
-
 }
