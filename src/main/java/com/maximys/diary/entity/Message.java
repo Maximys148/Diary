@@ -1,7 +1,10 @@
 package com.maximys.diary.entity;
 
+import com.maximys.diary.dto.MessageDTO;
 import com.maximys.diary.enums.SendStatus;
+import com.maximys.diary.service.EmailService;
 import jakarta.persistence.*;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 
@@ -28,6 +31,13 @@ public class Message extends TimeEntity{
     private List<Email> recipients; // Список адресатов
 
     public Message() {
+    }
+
+    public Message(MessageDTO messageDTO){
+        this.content = messageDTO.getContent();
+        this.sendStatus = messageDTO.getSendStatus();
+        this.sender = null;
+        this.recipients = null;
     }
 
     public SendStatus getSendStatus() {

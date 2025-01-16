@@ -69,10 +69,10 @@
     </div>
     <div class="container">
         <h2>Ваш профиль</h2>
-        <h3>Никнейм: ${nickName}</h3>
-        <h3>Имя: ${firstName}</h3>
-        <h3>Фамилия: ${lastName}</h3>
-        <h3>Отчество: ${middleName}</h3>
+        <h3>Никнейм: ${user.nickName}</h3>
+        <h3>Имя: ${user.firstName}</h3>
+        <h3>Фамилия: ${user.lastName}</h3>
+        <h3>Отчество: ${user.middleName}</h3>
         <!-- Список email-адресов пользователя -->
         <div class="emails-list">
             <h4>Ваши Email:</h4>
