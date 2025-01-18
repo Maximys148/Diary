@@ -2,9 +2,7 @@ package com.maximys.diary.entity;
 
 import com.maximys.diary.dto.MessageDTO;
 import com.maximys.diary.enums.SendStatus;
-import com.maximys.diary.service.EmailService;
 import jakarta.persistence.*;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 

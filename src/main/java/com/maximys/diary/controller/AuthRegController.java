@@ -3,6 +3,8 @@ package com.maximys.diary.controller;
 import com.maximys.diary.dto.LoginDTO;
 import com.maximys.diary.dto.RegistrationDTO;
 import com.maximys.diary.service.AuthService;
+import com.maximys.diary.service.TokenService;
+import com.maximys.diary.service.UserService;
 import jakarta.servlet.http.HttpSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,10 +21,14 @@ import org.springframework.web.servlet.ModelAndView;
 public class AuthRegController {
     @Autowired
     private AuthService authService;
+    private TokenService tokenService;
+    private UserService userService;
     Logger logger = LoggerFactory.getLogger(MainController.class);
 
-    public AuthRegController(AuthService authService) {
+    public AuthRegController(AuthService authService, TokenService tokenService, UserService userService) {
         this.authService = authService;
+        this.tokenService = tokenService;
+        this.userService = userService;
     }
 
     @GetMapping(value = "/register")
@@ -52,7 +58,7 @@ public class AuthRegController {
     @PostMapping("/login")
     public String loginUser(LoginDTO loginDto, HttpSession session) {
         if (authService.login(loginDto)) {
-            session.setAttribute("user", loginDto);
+            session.setAttribute("token", tokenService.createToken(userService.getUser(loginDto)));
             logger.info(loginDto.getNickName() + ", успешно авторизовался");
             return "redirect:/main/main";
         }

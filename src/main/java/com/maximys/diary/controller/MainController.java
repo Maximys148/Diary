@@ -8,12 +8,10 @@ import com.maximys.diary.dto.LoginDTO;
 import com.maximys.diary.dto.MessageDTO;
 import com.maximys.diary.entity.Email;
 import com.maximys.diary.entity.Message;
+import com.maximys.diary.entity.Token;
 import com.maximys.diary.entity.User;
 import com.maximys.diary.enums.SendStatus;
-import com.maximys.diary.service.DiaryService;
-import com.maximys.diary.service.EmailService;
-import com.maximys.diary.service.MessageService;
-import com.maximys.diary.service.UserService;
+import com.maximys.diary.service.*;
 import jakarta.servlet.http.HttpSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,32 +25,35 @@ import org.springframework.web.servlet.ModelAndView;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 @Controller
 @RequestMapping(value = "/main")
 public class MainController {
     Logger logger = LoggerFactory.getLogger(MainController.class);
     @Autowired
-    private DiaryService diaryService;
+    private final DiaryService diaryService;
     @Autowired
-    private UserService userService;
+    private final UserService userService;
     @Autowired
-    private EmailService emailService;
+    private final EmailService emailService;
     @Autowired
-    private MessageService messageService;
-    private ObjectMapper objectMapper;
+    private final MessageService messageService;
+    @Autowired
+    private final TokenService tokenService;
+    private final ObjectMapper objectMapper;
 
-    public MainController(DiaryService diaryService, UserService userService, EmailService emailService, MessageService messageService, ObjectMapper objectMapper) {
+    public MainController(DiaryService diaryService, UserService userService, EmailService emailService, MessageService messageService, TokenService tokenService, ObjectMapper objectMapper) {
         this.diaryService = diaryService;
         this.userService = userService;
         this.emailService = emailService;
         this.messageService = messageService;
+        this.tokenService = tokenService;
         this.objectMapper = objectMapper;
     }
     @GetMapping(value = "/main")
     public ModelAndView showMainForm(ModelAndView model, HttpSession session) throws JsonProcessingException {
-        LoginDTO loginDTO = (LoginDTO) session.getAttribute("user");
-        Long id = userService.getUser(loginDTO).getId();
+        Long id = getUserFromToken(session).getId();
         objectMapper.writeValueAsString(diaryService.getEventsByUserId(id));
         objectMapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
         model.addObject("events", objectMapper.writeValueAsString(diaryService.getEventsByUserId(id)));
@@ -63,8 +64,7 @@ public class MainController {
     @GetMapping("/email")
     public ModelAndView emailPage(ModelAndView model, @RequestParam(required = false) String selectedEmail, HttpSession session) {
         // Логика для получения всех доступных почтовых ящиков
-        LoginDTO loginDTO = (LoginDTO) session.getAttribute("user");
-        User user = userService.getUser(loginDTO);
+        User user = getUserFromToken(session);
         List<Email> emailList = user.getEmails(); // Ваш сервис для получения адресов
 
         model.addObject("emails", emailList);
@@ -86,10 +86,8 @@ public class MainController {
     }
 
     @PostMapping("/email")
-    public String sendMessage(MessageDTO messageDTO, HttpSession session) {
+    public String sendMessage(MessageDTO messageDTO) {
         // Добавьте бизнес-логику для добавления события
-        LoginDTO loginDTO = (LoginDTO) session.getAttribute("user");
-        User user = userService.getUser(loginDTO);
         Message message = messageService.createMessage(messageDTO);
         message.setSendStatus(SendStatus.SENDING);
         if(emailService.sendMessage(message)){
@@ -101,22 +99,18 @@ public class MainController {
     // Просмотр профиля
     @GetMapping("/profile")
     public ModelAndView viewProfile(ModelAndView model, HttpSession session) {
-        // Добавьте бизнес-логику для отображения профиля
-        LoginDTO loginDTO = (LoginDTO) session.getAttribute("user");
-        User userInfo = userService.getUser(loginDTO);
-        model.addObject("user", userInfo);
+        model.addObject("user", getUserFromToken(session));
         model.setViewName("profile");
         return model;
     }
     @PostMapping("/profile")
     public String registerUser(String email, HttpSession session) {
-        LoginDTO loginDTO = (LoginDTO) session.getAttribute("user");
-        User userInfo = userService.getUser(loginDTO);
-        if(userService.createAndLinkEmailToUser(userInfo.getNickName(), email)){
-            logger.info(loginDTO.getNickName() + ", успешно обновил профиль");
+        User user = getUserFromToken(session);
+        if(userService.createAndLinkEmailToUser(user.getNickName(), email)){
+            logger.info(user.getNickName() + ", успешно обновил профиль");
             return "redirect:/main/profile";
         }
-        logger.error(loginDTO.getNickName() + ", не смог обновить профиль");
+        logger.error(user.getNickName() + ", не смог обновить профиль");
         return"redirect:/main/profile";
     }
 
@@ -124,21 +118,23 @@ public class MainController {
     // Добавление события
     @GetMapping("/event")
     public ModelAndView viewEvent(ModelAndView model, HttpSession session) {
-        LoginDTO loginDTO = (LoginDTO) session.getAttribute("user");
-        Long id = userService.getUser(loginDTO).getId();
-        model.addObject("events", diaryService.getEventsByUserId(id));
+        model.addObject("events", diaryService.getEventsByUserId(getUserFromToken(session).getId()));
         model.setViewName("event");
         return model;
     }
     @PostMapping("/event")
-    public String addEvent(EventDTO eventDTO, HttpSession session) {
-        // Добавьте бизнес-логику для добавления события
-        LoginDTO loginDTO = (LoginDTO) session.getAttribute("user");
-        User user = userService.getUser(loginDTO);
-        eventDTO.setUser(user);
+    public String addEvent(EventDTO eventDTO, HttpSession session) {;
+        eventDTO.setUser(getUserFromToken(session));
         if(diaryService.addEvent(eventDTO)){
             return "redirect:/main/event";
         };
         return "Ошибка";
     }
+
+    private User getUserFromToken(HttpSession session) {
+        Token userToken = (Token) session.getAttribute("token");
+        Optional<User> userByToken = tokenService.getUserByToken(userToken);
+        return userByToken.orElse(null);
+    }
 }
+

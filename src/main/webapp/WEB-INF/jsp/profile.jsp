@@ -77,13 +77,13 @@
         <div class="emails-list">
             <h4>Ваши Email:</h4>
             <ul>
-                <c:if test="${not empty emails}">
-                    <c:forEach var="email" items="${emails}">
+                <c:if test="${not empty user.emails}">
+                    <c:forEach var="email" items="${user.emails}">
                         <li>${email.address}</li>
                     </c:forEach>
                 </c:if>
-                <c:if test="${empty emails}">
-                    <li class="no-emails">У вас нет зарегистрированных email-адресов. Рекомендуем завести почту для получения уведомлений о предстоящих событиях</li>
+                <c:if test="${empty user.emails}">
+                    <li class="no-emails">У вас нет зарегистрированных email-адресов. Рекомендуем завести почту для получения уведомлений о предстоящих событиях.</li>
                 </c:if>
             </ul>
         </div>

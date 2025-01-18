@@ -12,7 +12,6 @@ public class MessageDTO {
     private SendStatus sendStatus; // Статус отправки
     private String senderEmail; // Email отправителя
     private String recipientEmails; // Список адресов получателей
-    private EmailService emailService;
 
     // Конструктор без аргументов
     public MessageDTO() {
