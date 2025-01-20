@@ -81,7 +81,7 @@
         <h2>Сообщения для ${userEmail}</h2>
         <ul>
             <c:forEach var="message" items="${messages}">
-                <li>${message.content} - Статус: ${message.sendStatus}</li>
+                <li>${message.content} - От: ${message.sender.address}</li>
             </c:forEach>
         </ul>
     </c:if>

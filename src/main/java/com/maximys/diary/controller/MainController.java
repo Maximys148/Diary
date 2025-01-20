@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -41,14 +42,17 @@ public class MainController {
     private final MessageService messageService;
     @Autowired
     private final TokenService tokenService;
+    @Autowired
+    private final NotificationService notificationService;
     private final ObjectMapper objectMapper;
 
-    public MainController(DiaryService diaryService, UserService userService, EmailService emailService, MessageService messageService, TokenService tokenService, ObjectMapper objectMapper) {
+    public MainController(DiaryService diaryService, UserService userService, EmailService emailService, MessageService messageService, TokenService tokenService, NotificationService notificationService, ObjectMapper objectMapper) {
         this.diaryService = diaryService;
         this.userService = userService;
         this.emailService = emailService;
         this.messageService = messageService;
         this.tokenService = tokenService;
+        this.notificationService = notificationService;
         this.objectMapper = objectMapper;
     }
     @GetMapping(value = "/main")
@@ -56,7 +60,9 @@ public class MainController {
         Long id = getUserFromToken(session).getId();
         objectMapper.writeValueAsString(diaryService.getEventsByUserId(id));
         objectMapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
+        model.addObject("notifications", notificationService.getUpcomingNotifications(getUserFromToken(session)));
         model.addObject("events", objectMapper.writeValueAsString(diaryService.getEventsByUserId(id)));
+        model.addObject("currentTime", LocalDateTime.now());
         model.setViewName("main");
         return model;
     }
@@ -126,6 +132,7 @@ public class MainController {
     public String addEvent(EventDTO eventDTO, HttpSession session) {;
         eventDTO.setUser(getUserFromToken(session));
         if(diaryService.addEvent(eventDTO)){
+            notificationService.createNotifications(eventDTO);
             return "redirect:/main/event";
         };
         return "Ошибка";
