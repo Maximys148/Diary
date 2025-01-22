@@ -75,15 +75,13 @@
                         </div>
                         <div class="modal-body" id="notificationList">
                             <!-- Проверяем, есть ли уведомления -->
-                            <c:if test="${not empty notifications}">
-                               <ul class="list-group">
-                                   <c:forEach var="notification" items="${notifications}">
-                                       <li class="list-group-item ${notification.read ? '' : 'font-weight-bold'}">
-                                           ${notification.eventName} - ${notification.alertTime}
-                                       </li>
-                                   </c:forEach>
-                               </ul>
-                           </c:if>
+                            <c:forEach var="notification" items="${notifications}">
+                               <c:if test="${!notification.read}">
+                                   <li class="list-group-item font-weight-bold">
+                                       осталось ${notification.alertTime} до события ${notification.eventName}
+                                   </li>
+                               </c:if>
+                            </c:forEach>
                             <c:if test="${empty notifications}">
                                 <p>Нет новых уведомлений.</p>
                             </c:if>

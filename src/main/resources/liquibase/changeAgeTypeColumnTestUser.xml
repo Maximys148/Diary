@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="1" author="Maximys">
+        <preConditions>
+            <columnExists schemaName="public" tableName="test_user" columnName="age"/>
+            <not>
+                <sqlCheck expectedResult="BIGINT">
+                    SELECT DATA_TYPE
+                    FROM INFORMATION_SCHEMA.COLUMNS
+                    WHERE TABLE_NAME = 'test_user'
+                    AND COLUMN_NAME = 'age'
+                </sqlCheck>
+            </not>
+        </preConditions>
+        <modifyDataType tableName="test_user" columnName="age" newDataType="BIGINT"/>
+    </changeSet>
+
+</databaseChangeLog>

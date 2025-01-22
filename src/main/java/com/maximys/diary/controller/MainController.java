@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.ModelAndView;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -62,7 +63,7 @@ public class MainController {
         objectMapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
         model.addObject("notifications", notificationService.getUpcomingNotifications(getUserFromToken(session)));
         model.addObject("events", objectMapper.writeValueAsString(diaryService.getEventsByUserId(id)));
-        model.addObject("currentTime", LocalDateTime.now());
+        model.addObject("currentTime", LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME));
         model.setViewName("main");
         return model;
     }

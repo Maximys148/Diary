@@ -1,7 +1,9 @@
 spring:
+  output:
+    ansi:
+      enabled: ALWAYS
   mvc:
     view:
-
       prefix: "/WEB-INF/jsp/"
       suffix: ".jsp"
   datasource:
@@ -16,6 +18,8 @@ spring:
       dialect: postgresql
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: validate
+  liquibase:
+    change-log: classpath:liquibase/master.xml
 server:
   port: 8091

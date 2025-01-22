@@ -44,7 +44,6 @@ public class TokenFilter implements Filter {
             httpResponse.sendRedirect("/start/login");
             return;
         }
-        LocalDateTime expirationTime = tokenValue.getExpirationTime();
         tokenService.refreshToken(tokenValue);
         chain.doFilter(request, response);
     }

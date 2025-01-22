@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="1" author="Maximys">
+        <preConditions>
+            <not>
+                <columnExists schemaName="public" tableName="test_user" columnName="age"/>
+            </not>
+        </preConditions>
+        <addColumn schemaName="public" tableName="test_user">
+            <column name="age" type="INT"/>
+        </addColumn>
+    </changeSet>
+
+</databaseChangeLog>
