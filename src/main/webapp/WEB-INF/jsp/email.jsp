@@ -63,15 +63,31 @@
         .message-input {
             margin-top: 20px;
         }
+        .button {
+            display: inline-block;
+            padding: 10px 20px;
+            font-size: 16px;
+            color: white;
+            background-color: #007BFF; /* Цвет кнопки */
+            border: none;
+            border-radius: 5px;
+            text-decoration: none; /* Без подчеркивания */
+        }
     </style>
 </head>
 <body>
+<div>
+    <a href="${pageContext.request.contextPath}/main/main" class="button">Вернуться на главную</a>
+</div>
     <h1>Выберите почтовый ящик</h1>
 
     <form action="${pageContext.request.contextPath}/main/email" method="get">
         <select name="selectedEmail">
             <c:forEach var="email" items="${emails}">
-                <option value="${email.address}">${email.address}</option>
+                <option value="${email.address}">
+                    ${email.address}
+                    <p>Непрочитанные сообщения: ${unreadCounts[email.address]}</p>
+                </option>
             </c:forEach>
         </select>
         <input type="submit" value="Показать сообщения">
