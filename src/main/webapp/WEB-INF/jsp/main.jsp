@@ -78,7 +78,7 @@
                             <c:forEach var="notification" items="${notifications}">
                                <c:if test="${!notification.read}">
                                    <li class="list-group-item font-weight-bold">
-                                       осталось ${notification.alertTime} до события ${notification.eventName}
+                                       осталось ${currentTime[notification]} до события ${notification.eventName}
                                    </li>
                                </c:if>
                             </c:forEach>

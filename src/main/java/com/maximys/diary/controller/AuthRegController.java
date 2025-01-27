@@ -63,6 +63,6 @@ public class AuthRegController {
             return "redirect:/main/main";
         }
         logger.error(loginDto.getNickName() + ", не смог авторизовался");
-        return "redirect:/start/login";
+        return "redirect:/start/register";
     }
 }

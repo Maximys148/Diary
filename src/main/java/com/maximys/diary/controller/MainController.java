@@ -6,10 +6,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.maximys.diary.dto.EventDTO;
 import com.maximys.diary.dto.LoginDTO;
 import com.maximys.diary.dto.MessageDTO;
-import com.maximys.diary.entity.Email;
-import com.maximys.diary.entity.Message;
-import com.maximys.diary.entity.Token;
-import com.maximys.diary.entity.User;
+import com.maximys.diary.entity.*;
 import com.maximys.diary.enums.SendStatus;
 import com.maximys.diary.service.*;
 import jakarta.servlet.http.HttpSession;
@@ -25,9 +22,7 @@ import org.springframework.web.servlet.ModelAndView;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Controller
 @RequestMapping(value = "/main")
@@ -61,9 +56,10 @@ public class MainController {
         Long id = getUserFromToken(session).getId();
         objectMapper.writeValueAsString(diaryService.getEventsByUserId(id));
         objectMapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
-        model.addObject("notifications", notificationService.getUpcomingNotifications(getUserFromToken(session)));
+        List<Notification> notifications = notificationService.getUpcomingNotifications(getUserFromToken(session));
+        model.addObject("notifications", notifications);
         model.addObject("events", objectMapper.writeValueAsString(diaryService.getEventsByUserId(id)));
-        model.addObject("currentTime", LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME));
+        model.addObject("currentTime", notificationService.getTimeDifferenceNotification(notifications));
         model.setViewName("main");
         return model;
     }
@@ -72,14 +68,22 @@ public class MainController {
     public ModelAndView emailPage(ModelAndView model, @RequestParam(required = false) String selectedEmail, HttpSession session) {
         // Логика для получения всех доступных почтовых ящиков
         User user = getUserFromToken(session);
-        List<Email> emailList = user.getEmails(); // Ваш сервис для получения адресов
+        List<Email> emailList = user.getEmails();
+
+        // Получаем количество непрочитанных сообщений для каждой почты
+        Map<String, Integer> unreadCounts = new HashMap<>();
+        for (Email email : emailList) {
+            int unreadCount = messageService.getUnreadMessageCountForEmail(email.getAddress()); // Метод для получения количества непрочитанных сообщений
+            unreadCounts.put(email.getAddress(), unreadCount);
+        }
 
         model.addObject("emails", emailList);
-
+        model.addObject("unreadCounts", unreadCounts);
         // Проверка на изменённое значение selectedEmail
         if (selectedEmail != null && !selectedEmail.isEmpty()) {
             // Если почта выбрана, получить сообщения
             List<Message> messages = messageService.getAllMessagesForEmail(selectedEmail); // Ваш метод для получения сообщений
+            messageService.markMessagesAsRead(selectedEmail);
             model.addObject("userEmail", selectedEmail);
             model.addObject("messages", messages);
         } else {
@@ -88,19 +92,30 @@ public class MainController {
             model.addObject("messages", Collections.emptyList());
         }
 
-        model.setViewName("email"); // имя JSP-страницы
+        model.setViewName("email");
         return model;
     }
 
     @PostMapping("/email")
     public String sendMessage(MessageDTO messageDTO) {
-        // Добавьте бизнес-логику для добавления события
+        // Создание сообщения из DTO
         Message message = messageService.createMessage(messageDTO);
+
+        // Устанавливаем статус отправки как SENDING
         message.setSendStatus(SendStatus.SENDING);
-        if(emailService.sendMessage(message)){
+        messageService.updateMessage(message); // Сохраняем промежуточный статус в базе данных, если это необходимо
+
+        // Попытка отправки сообщения
+        boolean isSent = emailService.sendMessage(message);
+
+        // Проверяем результат отправки
+        if (isSent) {
+            // Если сообщение было успешно отправлено, обновляем статус на SEND
+            message.setSendStatus(SendStatus.SEND);
+            messageService.updateMessage(message); // Сохраняем финальный статус в базе данных
             return "redirect:/main/email";
-        };
-        return "Ошибка";
+        }
+        return "Ошибка: Не удалось отправить сообщение.";
     }
 
     // Просмотр профиля

@@ -30,7 +30,7 @@ public class TokenFilter implements Filter {
         Token tokenValue = (Token) httpRequest.getSession().getAttribute("token");
 
         // Пропускаем запросы к /start и /start/login
-        if (requestURI.equals("/start") || requestURI.equals("/start/login")) {
+        if (requestURI.equals("/start/register") || requestURI.equals("/start/login")) {
             chain.doFilter(request, response);
             return;
         }
