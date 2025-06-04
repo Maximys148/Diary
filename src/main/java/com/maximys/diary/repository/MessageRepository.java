@@ -9,17 +9,25 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
-public interface MessageRepository extends JpaRepository<Message, String> {
+public interface MessageRepository extends JpaRepository<Message, Long> { // Лучше использовать Long для ID
+
+    // Находит сообщения по адресу получателя (работает, если связь настроена правильно)
     List<Message> findByRecipients_Address(String address);
 
-    // Метод для получения всех сообщений со статусом SEND
+    // Находит сообщения по статусу
     List<Message> findBySendStatus(SendStatus sendStatus);
 
-    // Метод для замены статуса сообщений на READ
+    // Обновляет статус сообщений для конкретного email
     @Modifying
-    @Query("UPDATE Message m SET m.sendStatus = :newStatus WHERE m.sendStatus = :oldStatus AND EXISTS (SELECT 1 FROM m.recipients r WHERE r.address = :email)")
-    void updateSendStatusByEmail(@Param("newStatus") SendStatus newStatus,
-                                 @Param("oldStatus") SendStatus oldStatus,
-                                 @Param("email") String email);
+    @Query("UPDATE Message m SET m.sendStatus = :newStatus " +
+            "WHERE m.sendStatus = :oldStatus " +
+            "AND EXISTS (SELECT r FROM m.recipients r WHERE r.address = :email)")
+    void updateSendStatusByEmail(
+            @Param("newStatus") SendStatus newStatus,
+            @Param("oldStatus") SendStatus oldStatus,
+            @Param("email") String email
+    );
+
+    // Находит сообщения по адресу и статусу
     List<Message> findByRecipients_AddressAndSendStatus(String address, SendStatus sendStatus);
 }

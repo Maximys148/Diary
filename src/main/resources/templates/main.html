@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Главная страница</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link href='https://cdn.jsdelivr.net/npm/fullcalendar@5.10.2/main.min.css' rel='stylesheet' />
+    <style>
+        .sidebar {
+            width: 250px;
+            min-height: 100vh;
+        }
+        .content {
+            flex: 1;
+            padding: 20px;
+        }
+        .layout {
+            display: flex;
+            min-height: 100vh;
+        }
+        .free-day {
+            background-color: #28a745 !important;
+            color: white !important;
+        }
+        .busy-day {
+            background-color: #dc3545 !important;
+            color: white !important;
+        }
+        .notification-bell {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            cursor: pointer;
+            z-index: 1000;
+        }
+        #calendar {
+            max-width: 900px;
+            margin: 40px auto;
+        }
+        .fc-event {
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+<div class="layout">
+    <div class="sidebar bg-light p-3 border-right">
+        <h4>Функции сайта</h4>
+        <ul class="list-unstyled">
+            <li><a th:href="@{/main/email}">Почта</a></li>
+            <li><a th:href="@{/main/profile}">Профиль</a></li>
+            <li><a th:href="@{/main/event}">Мои события</a></li>
+        </ul>
+    </div>
+
+    <div class="content">
+        <h2 class="text-center mb-4">Календарь событий</h2>
+        <div id="calendar"></div>
+
+        <!-- Иконка уведомлений -->
+        <div class="notification-bell" data-toggle="modal" data-target="#notificationModal">
+            <i class="fas fa-bell fa-2x"></i>
+            <span class="badge badge-pill badge-danger" id="notificationCount"
+                  th:text="${notifications != null ? #lists.size(notifications) : 0}">0</span>
+        </div>
+
+        <!-- Модальное окно уведомлений -->
+        <div class="modal fade" id="notificationModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Уведомления</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Закрыть">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div th:if="${notifications == null or #lists.isEmpty(notifications)}">
+                            <p class="text-muted">Нет новых уведомлений.</p>
+                        </div>
+                        <ul class="list-group" th:if="${notifications != null and !#lists.isEmpty(notifications)}">
+                            <li th:each="notification : ${notifications}"
+                                th:class="${'list-group-item' + (not notification.read ? ' font-weight-bold' : '')}">
+                                Осталось <span th:text="${currentTime?.get(notification)}"></span>
+                                до события <span th:text="${notification.eventName}"></span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Подключаем скрипты -->
+<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script src='https://cdn.jsdelivr.net/npm/fullcalendar@5.10.2/main.min.js'></script>
+<script src='https://cdn.jsdelivr.net/npm/fullcalendar@5.10.2/locales/ru.min.js'></script>
+<script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+
+<script th:inline="javascript">
+    document.addEventListener('DOMContentLoaded', function() {
+        // Получаем события из модели
+        var eventsJson = /*[[${events}]]*/ '[]';
+        var events = JSON.parse(eventsJson);
+
+        // Инициализируем календарь
+        var calendarEl = document.getElementById('calendar');
+        var calendar = new FullCalendar.Calendar(calendarEl, {
+            locale: 'ru',
+            initialView: 'dayGridMonth',
+            headerToolbar: {
+                left: 'prev,next today',
+                center: 'title',
+                right: 'dayGridMonth,timeGridWeek,timeGridDay'
+            },
+            events: events.map(function(event) {
+                return {
+                    title: event.name,
+                    start: event.dateTime,
+                    className: 'busy-day',
+                    allDay: true
+                };
+            }),
+            eventContent: function(arg) {
+                return {
+                    html: '<div class="fc-event-title">' + arg.event.title + '</div>'
+                };
+            },
+            dateClick: function(info) {
+                // Обработка клика по дате
+                console.log('Clicked on: ' + info.dateStr);
+            }
+        });
+
+        calendar.render();
+
+        // Добавляем свободные дни
+        var currentDate = new Date();
+        var endDate = new Date();
+        endDate.setMonth(currentDate.getMonth() + 2);
+
+        while (currentDate < endDate) {
+            var dateStr = currentDate.toISOString().split('T')[0];
+            var hasEvent = calendar.getEvents().some(function(event) {
+                return event.startStr === dateStr;
+            });
+
+            if (!hasEvent) {
+                calendar.addEvent({
+                    title: 'Свободно',
+                    start: dateStr,
+                    className: 'free-day',
+                    allDay: true
+                });
+            }
+            currentDate.setDate(currentDate.getDate() + 1);
+        }
+    });
+</script>
+
+</body>
+</html>

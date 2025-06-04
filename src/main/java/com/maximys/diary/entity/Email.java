@@ -1,64 +1,40 @@
 package com.maximys.diary.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 @Entity
-@Table(name = "email")
+@Table(name = "t_email")
 public class Email {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "email_id")
+    @SequenceGenerator(name = "email_id", sequenceName = "email_id", allocationSize = 1)
     private Long id;
-    private String address;
 
-    @ManyToOne
-    @JoinColumn(name = "receiver_email_id", nullable = false)
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", referencedColumnName = "id")
     private User user;
 
-    @OneToMany(mappedBy = "sender", cascade = CascadeType.ALL) // Изменено на "sender"
-    @JsonIgnore // Игнорируем, чтобы избежать циклической сериализации
-    private List<Message> messages; // Теперь корректно ссылается на отправленные сообщения
+    @Column(unique = true, nullable = false)
+    private String address;
 
-    public Email(String address, User user) {
-        this.address = address;
+    // Сообщения, где этот email является отправителем
+    @OneToMany(mappedBy = "sender", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Message> sentMessages;
+
+    // Сообщения, где этот email является получателем
+    @ManyToMany(mappedBy = "recipients")
+    private List<Message> receivedMessages;
+
+    public Email(User user, String address) {
         this.user = user;
-    }
-
-    public Email() {
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getAddress() {
-        return address;
-    }
-
-    public void setAddress(String address) {
         this.address = address;
-    }
-
-    public User getUser() {
-        return user;
-    }
-
-    public void setUser(User user) {
-        this.user = user;
-    }
-
-    public List<Message> getMessages() {
-        return messages;
-    }
-
-    public void setMessages(List<Message> messages) {
-        this.messages = messages;
     }
 }
-

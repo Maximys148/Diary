@@ -18,8 +18,19 @@ spring:
       dialect: postgresql
   jpa:
     hibernate:
-      ddl-auto: validate
+      ddl-auto: update
   liquibase:
     change-log: classpath:liquibase/master.xml
 server:
   port: 8091
+jwt:
+  secret: 53A73E5F1C4E0A2D3B5F2D784E6A1B423D6F587D1F6E5C3A596D635A75327855
+  expiration: 300  #
+  refresh-token-expiration: 1000
+
+logging:
+  level:
+
+    org.springframework.security: DEBUG
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE

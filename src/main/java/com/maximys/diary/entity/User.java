@@ -2,98 +2,86 @@ package com.maximys.diary.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.maximys.diary.dto.RegistrationDTO;
+import com.maximys.diary.enums.Role;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Collection;
 import java.util.List;
 
 @Entity
 @Table(name = "t_user")
-public class User {
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class User implements UserDetails {
     @Id
-    @GeneratedValue(generator = "user_id", strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "user_id")
+    @SequenceGenerator(name = "user_id", sequenceName = "user_id", allocationSize = 1)
     private Long id;
-    private String nickName;
-    private String firstName;
-    private String lastName;
-    private String middleName;
-    private String password;
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
-    @JsonIgnore
-    private List<Email> emails;
 
-    public User(String nickName, String firstName, String lastName, String middleName, String password, List<Email> emails) {
-        this.nickName = nickName;
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.middleName = middleName;
-        this.password = password;
-        this.emails = emails;
-    }
+    private String userName;
+
+    private String firstName;
+
+    private String lastName;
+
+    private String middleName;
+
+    private String password;
+
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+    @JsonIgnore
+    private Email email;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "role", nullable = false)
+    private Role role;
+
     public User(RegistrationDTO dto){
-        this.nickName = dto.getNickName();
+        this.userName = dto.getUserName();
         this.firstName = dto.getFirstName();
         this.lastName = dto.getLastName();
         this.middleName = dto.getMiddleName();
         this.password = dto.getPassword();
     }
 
-    public User() {
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return List.of(new SimpleGrantedAuthority(role.name()));
     }
 
-    public String getNickName() {
-        return nickName;
+    @Override
+    public String getUsername() {
+        return this.userName;
     }
 
-    public void setNickName(String nickName) {
-        this.nickName = nickName;
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
     }
 
-    public List<Email> getEmails() {
-        return emails;
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
     }
 
-    public void setEmails(List<Email> emails) {
-        this.emails = emails;
-    }
-    public Long getId() {
-        return id;
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
     }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getFirstName() {
-        return firstName;
-    }
-
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
-    }
-
-    public String getLastName() {
-        return lastName;
-    }
-
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
-    }
-
-    public String getMiddleName() {
-        return middleName;
-    }
-
-    public void setMiddleName(String middleName) {
-        this.middleName = middleName;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
+    @Override
+    public boolean isEnabled() {
+        return true;
     }
 }

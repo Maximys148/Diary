@@ -14,6 +14,7 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -74,11 +75,12 @@ public class NotificationService {
     }
 
     public List<Notification> getUpcomingNotifications(User user) {
-        List<Notification> notifications = findByUser(user);
-        LocalDateTime now = LocalDateTime.now();
-        return notifications.stream()
-                .filter(notification -> notification.getAlertTime().isAfter(now))
-                .collect(Collectors.toList());
+        if (user == null) {
+            return Collections.emptyList();
+        }
+        // Ваша логика получения уведомлений
+        List<Notification> notifications = notificationRepository.findByUser(user);
+        return notifications != null ? notifications : Collections.emptyList();
     }
 
     public HashMap<Notification, String> getTimeDifferenceNotification(List<Notification> notifications) {

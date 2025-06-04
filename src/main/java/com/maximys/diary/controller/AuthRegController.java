@@ -1,68 +1,132 @@
 package com.maximys.diary.controller;
 
+import com.maximys.diary.dto.JwtAuthenticationResponse;
 import com.maximys.diary.dto.LoginDTO;
 import com.maximys.diary.dto.RegistrationDTO;
 import com.maximys.diary.service.AuthService;
-import com.maximys.diary.service.TokenService;
-import com.maximys.diary.service.UserService;
-import jakarta.servlet.http.HttpSession;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.maximys.diary.service.JwtService;
+import com.maximys.diary.service.UserDetailsServiceImpl;
+import com.maximys.diary.util.JwtTokenUtil;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseCookie;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
 @Controller
-@RequestMapping(value = "/start")
+@RequestMapping("/start")
+@RequiredArgsConstructor
+@Tag(name = "Аутентификация")
 public class AuthRegController {
-    @Autowired
-    private AuthService authService;
-    private TokenService tokenService;
-    private UserService userService;
-    Logger logger = LoggerFactory.getLogger(MainController.class);
+    private final AuthService authService;
+    private final JwtService jwtService;
+    private final UserDetailsServiceImpl userDetailsService;
+    private final JwtTokenUtil jwtTokenUtil;
+    private final Logger log = LogManager.getLogger(AuthRegController.class);
 
-    public AuthRegController(AuthService authService, TokenService tokenService, UserService userService) {
-        this.authService = authService;
-        this.tokenService = tokenService;
-        this.userService = userService;
+
+    @Operation(summary = "Стартовая страница")
+    @GetMapping("/welcome")
+    public ModelAndView welcomePage() {  // Убрали @CookieValue и проверку токена
+        return new ModelAndView("welcome"); // Всегда возвращаем страницу welcome
     }
 
-    @GetMapping(value = "/register")
-    public ModelAndView showRegistrationForm(ModelAndView model) {
-        model.setViewName("register");
-        model.addObject("registrationDto", new RegistrationDTO());
-        return model;
-    }
-
-    @PostMapping("/register")
-    public String registerUser(RegistrationDTO registrationDto) {
-        if(authService.saveUser(registrationDto)){
-            logger.info(registrationDto.getNickName() + ", успешно зарегистрировался");
-            return "redirect:/start/login";
-        }
-        logger.error(registrationDto.getNickName() + ", не смог зарегистрироваться");
-        return"redirect:/start/register";
-    }
-
+    @Operation(summary = "Страница авторизации")
     @GetMapping("/login")
-    public ModelAndView showLoginForm(ModelAndView model){
-        model.setViewName("login");
-        model.addObject("loginDto", new LoginDTO());
-        return model;
+    public ModelAndView showLoginPage(
+            @CookieValue(value = "jwtToken", required = false) String token,
+            HttpServletRequest request) {
+
+        // Проверяем, не пришли ли мы уже с /login (чтобы избежать цикла)
+        String referer = request.getHeader("Referer");
+        if (referer != null && referer.contains("/login")) {
+            return new ModelAndView("login");
+        }
+
+        if (token != null && jwtTokenUtil.validateToken(token)) {
+            String username = jwtTokenUtil.getUsernameFromToken(token);
+            if (username != null) {
+                return new ModelAndView("redirect:/main/main");
+            }
+        }
+
+        return new ModelAndView("login");
     }
 
+    @Operation(summary = "Авторизация пользователя")
     @PostMapping("/login")
-    public String loginUser(LoginDTO loginDto, HttpSession session) {
-        if (authService.login(loginDto)) {
-            session.setAttribute("token", tokenService.createToken(userService.getUser(loginDto)));
-            logger.info(loginDto.getNickName() + ", успешно авторизовался");
-            return "redirect:/main/main";
-        }
-        logger.error(loginDto.getNickName() + ", не смог авторизовался");
-        return "redirect:/start/register";
+    public ModelAndView signIn(
+            @ModelAttribute @Valid LoginDTO loginDTO,
+            HttpServletResponse response) {
+
+        JwtAuthenticationResponse authResponse = authService.signIn(loginDTO);
+
+        // Устанавливаем JWT в cookie
+        ResponseCookie cookie = buildJwtCookie(authResponse.getToken());
+        response.addHeader("Set-Cookie", cookie.toString());
+
+        return new ModelAndView("redirect:/main/main");
+    }
+
+    @Operation(summary = "Выход из системы")
+    @GetMapping("/logout")
+    public ModelAndView logout(HttpServletResponse response) {
+        ResponseCookie cookie = ResponseCookie.from("jwtToken", "")
+                .maxAge(0)
+                .path("/")
+                .build();
+        response.addHeader("Set-Cookie", cookie.toString());
+        return new ModelAndView("redirect:/start/login");
+    }
+
+
+    // Метод для создания JWT cookie
+    private ResponseCookie buildJwtCookie(String token) {
+        return ResponseCookie.from("jwtToken", token)
+                .httpOnly(true)
+                .secure(false) // В production должно быть true
+                .path("/")
+                .maxAge(7 * 24 * 60 * 60) // 7 дней
+                .sameSite("Lax")
+                .build();
+    }
+
+    // Остальные методы (регистрация и валидация) остаются без изменений
+    @Operation(summary = "Страница регистрации")
+    @GetMapping("/register")
+    public ModelAndView showRegistrationPage() {
+        return new ModelAndView("registration");
+    }
+
+    @Operation(summary = "Регистрация пользователя")
+    @PostMapping("/register")
+    public ModelAndView signUp(@ModelAttribute @Valid RegistrationDTO registrationDTO) {
+        JwtAuthenticationResponse response = authService.signUp(registrationDTO);
+        ModelAndView modelAndView = new ModelAndView("login");
+        modelAndView.addObject("token", response.getToken());
+        modelAndView.addObject("username", registrationDTO.getUserName());
+        return modelAndView;
+    }
+
+    @Operation(summary = "Валидация токена")
+    @GetMapping("/validate")
+    public ModelAndView validateToken(@RequestParam String token) {
+        String username = jwtService.extractUserName(token);
+        UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+
+        boolean isValid = jwtService.isTokenValid(token);
+        ModelAndView modelAndView = new ModelAndView("validate");
+        modelAndView.addObject("isValid", isValid);
+        modelAndView.addObject("username", username);
+        return modelAndView;
     }
 }

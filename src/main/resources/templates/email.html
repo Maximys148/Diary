@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Почта</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            color: #333;
+            margin: 20px;
+        }
+        h1 {
+            text-align: center;
+            color: #007bff;
+        }
+        form {
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+        select, textarea, input[type="text"], input[type="submit"] {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        input[type="submit"] {
+            background: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        input[type="submit"]:hover {
+            background: #0056b3;
+        }
+        ul {
+            list-style: none;
+            padding: 0;
+        }
+        li {
+            padding: 10px;
+            background: #e9ecef;
+            margin-bottom: 5px;
+            border-radius: 4px;
+        }
+        .message-input {
+            margin-top: 20px;
+        }
+        .button {
+            display: inline-block;
+            padding: 10px 20px;
+            font-size: 16px;
+            color: white;
+            background-color: #007BFF;
+            border: none;
+            border-radius: 5px;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+<div>
+    <a th:href="@{/main/main}" class="button">Вернуться на главную</a>
+</div>
+<h1>Выберите почтовый ящик</h1>
+
+<form th:action="@{/main/email}" method="get">
+    <select name="selectedEmail">
+        <option th:each="email : ${emails}"
+                th:value="${email.address}"
+                th:text="${email.address + ' Непрочитанные сообщения: ' + unreadCounts[email.address]}">
+        </option>
+    </select>
+    <input type="submit" value="Показать сообщения">
+</form>
+
+<div th:if="${not #lists.isEmpty(messages)}">
+    <h2>Сообщения для <span th:text="${userEmail}"></span></h2>
+    <ul>
+        <li th:each="message : ${messages}"
+            th:text="${message.content + ' - От: ' + message.sender.address}">
+        </li>
+    </ul>
+</div>
+
+<div th:if="${userEmail != null}">
+    <h2 class="message-input">Написать сообщение</h2>
+    <form th:action="@{/main/email}" method="post">
+        <input type="text" name="recipientEmails" placeholder="Введите адрес(а) получателя(-ей)" required>
+        <input type="hidden" name="senderEmail" th:value="${userEmail}">
+        <input type="hidden" name="userEmail" th:value="${userEmail}">
+        <textarea name="content" rows="4" cols="50" placeholder="Введите ваше сообщение" required></textarea><br>
+        <input type="submit" value="Отправить">
+    </form>
+</div>
+</body>
+</html>

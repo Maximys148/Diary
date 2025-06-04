@@ -33,9 +33,9 @@ public class EmailService {
         // Сохраняем сообщение для каждого получателя
         for (Email email : recipientEmails) {
             Email byAddress = emailRepository.findByAddress(email.getAddress());
-            List<Message> messages = byAddress.getMessages();
+            List<Message> messages = byAddress.getReceivedMessages(); // мб надо менять метод
             messages.add(message); // Используем уже существующий объект message
-            byAddress.setMessages(messages);
+            byAddress.setReceivedMessages(messages); // мб надо менять метод
             emailRepository.save(byAddress); // Сохраняем обновленный объект Email
         }
 

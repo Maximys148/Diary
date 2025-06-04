@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Добро пожаловать</title>
+    <style>
+        .container {
+            text-align: center;
+            margin-top: 100px;
+        }
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            margin: 10px;
+            background: #4CAF50;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>Добро пожаловать!</h1>
+    <a th:href="@{/start/login}" class="btn">Войти</a>
+    <a th:href="@{/start/register}" class="btn">Зарегистрироваться</a>
+</div>
+</body>
+</html>

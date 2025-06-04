@@ -8,6 +8,7 @@ import com.maximys.diary.enums.SendStatus;
 import com.maximys.diary.repository.MessageRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -22,6 +23,8 @@ public class MessageService {
     public MessageService(MessageRepository messageRepository){
         this.messageRepository = messageRepository;
     }
+
+    @Cacheable(value = "messages", key = "#address")
     public List<Message> getAllMessagesForEmail(String address){
         return messageRepository.findByRecipients_Address(address);
     }
