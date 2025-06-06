@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>Главная страница</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"/>
     <link href='https://cdn.jsdelivr.net/npm/fullcalendar@5.10.2/main.min.css' rel='stylesheet' />
     <style>
         .sidebar {
@@ -77,20 +77,17 @@
                         </button>
                     </div>
                     <div class="modal-body">
-                        <div th:if="${notifications == null or #lists.isEmpty(notifications)}">
-                            <p class="text-muted">Нет новых уведомлений.</p>
-                        </div>
-                        <ul class="list-group" th:if="${notifications != null and !#lists.isEmpty(notifications)}">
-                            <li th:each="notification : ${notifications}"
-                                th:class="${'list-group-item' + (not notification.read ? ' font-weight-bold' : '')}">
-                                Осталось <span th:text="${currentTime?.get(notification)}"></span>
-                                до события <span th:text="${notification.eventName}"></span>
-                            </li>
+                        <!-- Контейнер для списка уведомлений -->
+                        <ul class="list-group" id="notificationsList">
+                            <!-- Здесь будут вставляться уведомления через JS -->
                         </ul>
+                        <!-- Сообщение, если уведомлений нет -->
+                        <p class="text-muted" id="noNotificationsMessage">Нет новых уведомлений.</p>
                     </div>
                 </div>
             </div>
         </div>
+
     </div>
 </div>
 
@@ -100,15 +97,21 @@
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 <script src='https://cdn.jsdelivr.net/npm/fullcalendar@5.10.2/main.min.js'></script>
 <script src='https://cdn.jsdelivr.net/npm/fullcalendar@5.10.2/locales/ru.min.js'></script>
-<script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+<script src='https://kit.fontawesome.com/a076d05399.js' crossorigin='anonymous'></script>
 
 <script th:inline="javascript">
-    document.addEventListener('DOMContentLoaded', function() {
-        // Получаем события из модели
-        var eventsJson = /*[[${events}]]*/ '[]';
-        var events = JSON.parse(eventsJson);
 
-        // Инициализируем календарь
+    // Передача данных из модели в JS
+    /*[[${events}]]*/
+    /*[[${notifications}]]*/
+
+    document.addEventListener('DOMContentLoaded', function() {
+
+        // Получаем события и уведомления из модели
+        var events = /*[[${events}]]*/ [];
+        var notifications = /*[[${notifications}]]*/ [];
+
+        // Инициализация календаря
         var calendarEl = document.getElementById('calendar');
         var calendar = new FullCalendar.Calendar(calendarEl, {
             locale: 'ru',
@@ -123,43 +126,94 @@
                     title: event.name,
                     start: event.dateTime,
                     className: 'busy-day',
-                    allDay: true
+                    allDay:true
                 };
             }),
-            eventContent: function(arg) {
-                return {
-                    html: '<div class="fc-event-title">' + arg.event.title + '</div>'
-                };
+            eventContent:function(arg){
+                return { html:'<div class=\"fc-event-title\">' + arg.event.title + '</div>' };
             },
-            dateClick: function(info) {
-                // Обработка клика по дате
-                console.log('Clicked on: ' + info.dateStr);
+            dateClick:function(info){
+                console.log('Clicked on:', info.dateStr);
             }
         });
-
         calendar.render();
 
-        // Добавляем свободные дни
+        // Добавляем свободные дни (следующие два месяца)
         var currentDate = new Date();
         var endDate = new Date();
         endDate.setMonth(currentDate.getMonth() + 2);
 
-        while (currentDate < endDate) {
+        while (currentDate <= endDate) {
             var dateStr = currentDate.toISOString().split('T')[0];
+
+            // Проверка есть ли событие на эту дату
             var hasEvent = calendar.getEvents().some(function(event) {
                 return event.startStr === dateStr;
             });
 
             if (!hasEvent) {
                 calendar.addEvent({
-                    title: 'Свободно',
+                    title:'Свободно',
                     start: dateStr,
-                    className: 'free-day',
-                    allDay: true
+                    className:'free-day',
+                    allDay:true
                 });
             }
+
             currentDate.setDate(currentDate.getDate() + 1);
         }
+
+        // Функция для обновления времени до события
+        function updateNotifications() {
+            var now = new Date();
+
+            notifications.forEach(function(n){
+                if(n.eventDateTime){
+                    var eventTime = new Date(n.eventDateTime);
+                    var diffMs = eventTime - now; // миллисекунды
+                    if(diffMs > 0){
+                        var diffMinutes = Math.floor(diffMs / (1000 * 60));
+                        n.timeRemaining = diffMinutes + ' минут';
+                    } else{
+                        n.timeRemaining='Прошло';
+                    }
+                } else{
+                    n.timeRemaining='Неизвестно';
+                }
+
+                // Обновляем отображение в списке
+                var listItem = document.querySelector('#notificationsList li[data-id="'+n.id+'"]');
+                if(listItem){
+                    listItem.innerHTML='Уведомление о событии "<strong>' + n.eventName + '</strong>"<br/> Осталось времени до начала: ' + n.timeRemaining;
+                }
+            });
+
+            // Обновляем счетчик уведомлений
+            document.getElementById('notificationCount').innerText=notifications.length;
+
+            // Обновляем список в модальном окне
+            var listContainer=document.getElementById('notificationsList');
+            listContainer.innerHTML='';
+            if(notifications.length===0){
+                document.getElementById('noNotificationsMessage').style.display='block';
+            } else{
+                document.getElementById('noNotificationsMessage').style.display='none';
+                notifications.forEach(function(n){
+                    var li=document.createElement('li');
+                    li.className='list-group-item' + (n.read?'':' font-weight-bold');
+                    li.setAttribute('data-id', n.id);
+                    li.innerHTML='Уведомление о событии "<strong>' + n.eventName + '</strong>"<br/> Осталось времени до начала: ' + n.timeRemaining;
+                    listContainer.appendChild(li);
+                });
+            }
+        }
+
+        // Изначально вызываем обновление времени
+        updateNotifications();
+
+        // Можно установить интервал для периодического обновления времени (например, каждую минуту)
+        setInterval(updateNotifications, 60000);
+
     });
 </script>
 

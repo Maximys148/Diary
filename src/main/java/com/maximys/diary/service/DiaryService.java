@@ -1,7 +1,7 @@
 package com.maximys.diary.service;
 
 import com.maximys.diary.dto.EventDTO;
-import com.maximys.diary.entity.Diary;
+import com.maximys.diary.entity.Event;
 import com.maximys.diary.repository.DiaryRepository;
 import org.springframework.stereotype.Service;
 
@@ -15,7 +15,7 @@ public class DiaryService {
         this.diaryRepository = diaryRepository;
     }
 
-    public List<Diary> getEventsByUserId(Long userId){
+    public List<Event> getEventsByUserId(Long userId){
         if(diaryRepository.findAllByUserId(userId) != null){
             return diaryRepository.findAllByUserId(userId);
         }
@@ -23,7 +23,7 @@ public class DiaryService {
     }
 
     public boolean addEvent(EventDTO eventDTO){
-        diaryRepository.save(new Diary(eventDTO));
+        diaryRepository.save(new Event(eventDTO));
         return true;
     }
 

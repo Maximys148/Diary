@@ -2,9 +2,11 @@ package com.maximys.diary.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.time.LocalDateTime;
 
+@EqualsAndHashCode(callSuper = true)
 @Entity
 @Table(name = "notification") //
 @Data
@@ -21,7 +23,7 @@ public class Notification extends TimeEntity{
 
     private boolean read;
 
-    private LocalDateTime alertTime;
+    private LocalDateTime eventDateTime;
 
 
 }

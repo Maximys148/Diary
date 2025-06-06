@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>403 - Доступ запрещен</title>
+    <style>
+        body {
+            background-color: #fff3cd;
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 50px;
+        }
+        .lock-icon {
+            font-size: 100px;
+            color: #ffc107;
+            margin-bottom: 20px;
+        }
+        .btn {
+            background-color: #6c757d;
+            color: white;
+            padding: 12px 24px;
+            text-decoration: none;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="lock-icon">🔒</div>
+    <h1>403 - Доступ запрещен</h1>
+    <p>У вас нет прав для просмотра этой страницы.</p>
+    <p>Если вы считаете, что это ошибка, обратитесь к администратору.</p>
+    <a href="/start/login" class="btn">Войти в систему</a>
+</body>
+</html>

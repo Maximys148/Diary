@@ -4,6 +4,7 @@ import com.maximys.diary.dto.JwtAuthenticationResponse;
 import com.maximys.diary.dto.LoginDTO;
 import com.maximys.diary.dto.RegistrationDTO;
 import com.maximys.diary.entity.User;
+import com.maximys.diary.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -17,9 +18,9 @@ import static com.maximys.diary.enums.Role.ROLE_USER;
 public class AuthService {
 
     private final UserService userService;
-    private final JwtService jwtService;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
+    private JwtUtil jwtUtil;
 
     public JwtAuthenticationResponse signUp(RegistrationDTO registrationDTO) {
         // Проверка, что пользователь с таким именем не существует
@@ -38,7 +39,7 @@ public class AuthService {
 
         userService.create(user);
 
-        var jwt = jwtService.generateToken(user);
+        var jwt = jwtUtil.generateToken(user);
         return new JwtAuthenticationResponse(jwt);
     }
 
@@ -58,7 +59,7 @@ public class AuthService {
                     .loadUserByUsername(loginDTO.getUserName());
 
             // Генерация токена
-            var jwt = jwtService.generateToken(user);
+            var jwt = jwtUtil.generateToken(user);
             return new JwtAuthenticationResponse(jwt);
 
         } catch (Exception e) {

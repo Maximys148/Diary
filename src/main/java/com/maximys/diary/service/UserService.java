@@ -6,7 +6,9 @@ import com.maximys.diary.entity.User;
 import com.maximys.diary.repository.EmailRepository;
 import com.maximys.diary.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
@@ -22,6 +24,15 @@ import static com.maximys.diary.enums.Role.ROLE_USER;
 public class UserService {
     private final UserRepository userRepository;
     private final EmailRepository emailRepository;
+
+    public User getUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.getPrincipal() instanceof UserDetails) {
+            String username = ((UserDetails) authentication.getPrincipal()).getUsername();
+            return this.findByUserName(username);
+        }
+        throw new RuntimeException("Пользователь не аутентифицирован");
+    }
 
 
     public User getUser(LoginDTO dto){
@@ -112,28 +123,10 @@ public class UserService {
     }
 
     /**
-     * Получение текущего пользователя
-     *
-     * @return текущий пользователь
-     */
-    public User getCurrentUser() {
-        // Получение имени пользователя из контекста Spring Security
-        var username = SecurityContextHolder.getContext().getAuthentication().getName();
-        return getByUsername(username);
-    }
-
-
-    /**
      * Выдача прав администратора текущему пользователю
      * <p>
      * Нужен для демонстрации
      */
-    @Deprecated
-    public void getAdmin() {
-        var user = getCurrentUser();
-        user.setRole(ROLE_ADMIN);
-        save(user);
-    }
 
     /*public boolean validateUser(String password, String email){
         // Есть ли почта в БД

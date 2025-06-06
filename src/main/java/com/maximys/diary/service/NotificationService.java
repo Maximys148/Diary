@@ -1,11 +1,9 @@
 package com.maximys.diary.service;
 
 import com.maximys.diary.dto.EventDTO;
-import com.maximys.diary.entity.Diary;
 import com.maximys.diary.entity.Notification;
 import com.maximys.diary.entity.User;
 import com.maximys.diary.enums.UnitTime;
-import com.maximys.diary.repository.DiaryRepository;
 import com.maximys.diary.repository.NotificationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -13,15 +11,9 @@ import org.springframework.stereotype.Service;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.time.temporal.ChronoUnit;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 @Service
 // Сервис, отвечающий за уведомления
@@ -47,7 +39,7 @@ public class NotificationService {
                 notification.setEventName(eventDTO.getName());
                 notification.setUser(eventDTO.getUser());
                 notification.setRead(false);
-                notification.setAlertTime(alertTime);
+                notification.setEventDateTime(alertTime);
                 notificationRepository.save(notification);
             }
         }
@@ -74,39 +66,40 @@ public class NotificationService {
         return notificationRepository.findByUser(user);
     }
 
-    public List<Notification> getUpcomingNotifications(User user) {
-        if (user == null) {
+    public List<Notification> getUpcomingNotifications(Long id) {
+        if (id == null) {
             return Collections.emptyList();
         }
         // Ваша логика получения уведомлений
-        List<Notification> notifications = notificationRepository.findByUser(user);
+        List<Notification> notifications = notificationRepository.findByUserId(id);
         return notifications != null ? notifications : Collections.emptyList();
     }
 
-    public HashMap<Notification, String> getTimeDifferenceNotification(List<Notification> notifications) {
-        HashMap<Notification, String> timeDifferences = new HashMap<>();
-
+    public HashMap<String, String> getTimeDifferenceNotification(List<Notification> notifications) {
+        HashMap<String, String> timeDifferences = new HashMap<>();
         LocalDateTime now = LocalDateTime.now();
 
         for (Notification notification : notifications) {
-            LocalDateTime alertTime = notification.getAlertTime();
+            LocalDateTime eventDateTime = notification.getEventDateTime();
+            String eventName = notification.getEventName();
+            if (eventDateTime == null) {
+                // Обработка случая, когда eventDateTime не задан
+                timeDifferences.put(eventName, "Нет времени уведомления");
+                continue;
+            }
 
-            // Вычисляем разницу во времени
-            Duration duration = Duration.between(now, alertTime);
+            Duration duration = Duration.between(now, eventDateTime);
             long seconds = duration.getSeconds();
 
-            // Проверка, осталось ли время до уведомления
             if (seconds < 0) {
-                // Если время уже прошло, можем указать, что событие прошло
-                timeDifferences.put(notification, "Событие прошло");
+                timeDifferences.put(eventName, "Событие прошло");
             } else {
                 long hours = seconds / 3600;
                 long minutes = (seconds % 3600) / 60;
                 long remainingSeconds = seconds % 60;
 
-                // Формируем строку с оставшимся временем
                 String remainingTime = String.format("%02d:%02d:%02d", hours, minutes, remainingSeconds);
-                timeDifferences.put(notification, remainingTime);
+                timeDifferences.put(eventName, remainingTime);
             }
         }
 

@@ -1,5 +1,6 @@
 package com.maximys.diary.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.maximys.diary.entity.User;
 import com.maximys.diary.enums.UnitTime;
 import lombok.AllArgsConstructor;
@@ -12,6 +13,7 @@ import java.util.Date;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonIgnoreProperties({"user"}) // Игнорируем обратную ссылку
 public class EventDTO {
     private String name;
     private String data;

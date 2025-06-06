@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import java.util.List;
 
@@ -25,12 +26,14 @@ public class Email {
     @Column(unique = true, nullable = false)
     private String address;
 
-    // Сообщения, где этот email является отправителем
+    // Список отправленных сообщений — игнорируем при сериализации, чтобы избежать цикла
     @OneToMany(mappedBy = "sender", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
     private List<Message> sentMessages;
 
-    // Сообщения, где этот email является получателем
+    // Получатели сообщений — игнорируем при сериализации
     @ManyToMany(mappedBy = "recipients")
+    @JsonIgnore
     private List<Message> receivedMessages;
 
     public Email(User user, String address) {

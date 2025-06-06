@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>400 - Неверный запрос</title>
+    <style>
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+            color: #343a40;
+            text-align: center;
+            padding: 50px;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        h1 {
+            color: #dc3545;
+            font-size: 3em;
+        }
+        .emoji { font-size: 5rem; }
+        .btn {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 5px;
+            display: inline-block;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="emoji">❌</div>
+        <h1>400</h1>
+        <h2>Неверный запрос</h2>
+        <p>Сервер не смог понять ваш запрос. Пожалуйста, проверьте введенные данные.</p>
+        <p th:if="${error}" th:text="${'Ошибка: ' + error}"></p>
+        <a href="/main/main" class="btn">На главную</a>
+    </div>
+</body>
+</html>

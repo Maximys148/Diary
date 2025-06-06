@@ -4,9 +4,7 @@ import com.maximys.diary.dto.JwtAuthenticationResponse;
 import com.maximys.diary.dto.LoginDTO;
 import com.maximys.diary.dto.RegistrationDTO;
 import com.maximys.diary.service.AuthService;
-import com.maximys.diary.service.JwtService;
-import com.maximys.diary.service.UserDetailsServiceImpl;
-import com.maximys.diary.util.JwtTokenUtil;
+import com.maximys.diary.util.JwtUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
@@ -15,9 +13,9 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
-import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
@@ -28,105 +26,148 @@ import org.springframework.web.servlet.ModelAndView;
 @Tag(name = "Аутентификация")
 public class AuthRegController {
     private final AuthService authService;
-    private final JwtService jwtService;
-    private final UserDetailsServiceImpl userDetailsService;
-    private final JwtTokenUtil jwtTokenUtil;
+    private final JwtUtil jwtUtil;
     private final Logger log = LogManager.getLogger(AuthRegController.class);
 
 
+    private static final String ERROR_VIEW_PREFIX = "error/"; // Префикс для error-страниц
+
+    /* Стартовая страница */
     @Operation(summary = "Стартовая страница")
     @GetMapping("/welcome")
-    public ModelAndView welcomePage() {  // Убрали @CookieValue и проверку токена
-        return new ModelAndView("welcome"); // Всегда возвращаем страницу welcome
+    public ModelAndView welcomePage() {
+        log.info("[GET] /start/welcome - Отображение стартовой страницы");
+        return new ModelAndView("welcome");
     }
 
+    /* Страница авторизации */
     @Operation(summary = "Страница авторизации")
     @GetMapping("/login")
     public ModelAndView showLoginPage(
             @CookieValue(value = "jwtToken", required = false) String token,
             HttpServletRequest request) {
 
-        // Проверяем, не пришли ли мы уже с /login (чтобы избежать цикла)
-        String referer = request.getHeader("Referer");
-        if (referer != null && referer.contains("/login")) {
-            return new ModelAndView("login");
-        }
+        log.debug("[GET] /start/login - Попытка входа. Проверка реферера и токена");
 
-        if (token != null && jwtTokenUtil.validateToken(token)) {
-            String username = jwtTokenUtil.getUsernameFromToken(token);
-            if (username != null) {
-                return new ModelAndView("redirect:/main/main");
+        try {
+            String referer = request.getHeader("Referer");
+            if (referer != null && referer.contains("/login")) {
+                log.warn("Обнаружен циклический редирект с /login");
+                return new ModelAndView("login");
             }
-        }
 
-        return new ModelAndView("login");
+            if (token != null && jwtUtil.validateToken(token)) {
+                String username = jwtUtil.getUsernameFromToken(token);
+                if (username != null) {
+                    log.info("Пользователь {} уже аутентифицирован. Редирект на /main", username);
+                    return new ModelAndView("redirect:/main/main");
+                }
+            }
+
+            log.info("Отображение страницы входа для нового пользователя");
+            return new ModelAndView("login");
+
+        } catch (Exception e) {
+            log.error("Ошибка при отображении страницы входа: {}", e.getMessage());
+            return handleError(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
+    /* Обработка авторизации */
     @Operation(summary = "Авторизация пользователя")
     @PostMapping("/login")
     public ModelAndView signIn(
             @ModelAttribute @Valid LoginDTO loginDTO,
             HttpServletResponse response) {
 
-        JwtAuthenticationResponse authResponse = authService.signIn(loginDTO);
+        log.info("[POST] /start/login - Попытка входа для пользователя {}", loginDTO.getUserName());
 
-        // Устанавливаем JWT в cookie
-        ResponseCookie cookie = buildJwtCookie(authResponse.getToken());
-        response.addHeader("Set-Cookie", cookie.toString());
+        try {
+            JwtAuthenticationResponse authResponse = authService.signIn(loginDTO);
 
-        return new ModelAndView("redirect:/main/main");
+            // Устанавливаем куку
+            ResponseCookie cookie = ResponseCookie.from("jwtToken", authResponse.getToken())
+                    .httpOnly(true)
+                    .secure(false) // true в production
+                    .path("/")
+                    .maxAge(7 * 24 * 60 * 60) // 7 дней
+                    .sameSite("Lax")
+                    .build();
+
+            response.addHeader("Set-Cookie", cookie.toString());
+            log.debug("Установлена JWT кука для пользователя: {}", loginDTO.getUserName());
+            return new ModelAndView("redirect:/main/main");
+
+        } catch (AuthenticationException e) {
+            log.warn("Ошибка аутентификации: {}", e.getMessage());
+            ModelAndView model = new ModelAndView("login");
+            model.addObject("error", "Неверные учетные данные");
+            return model;
+        } catch (Exception e) {
+            log.error("Системная ошибка при авторизации: {}", e.getMessage());
+            return handleError(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
+    /* Выход из системы */
     @Operation(summary = "Выход из системы")
     @GetMapping("/logout")
     public ModelAndView logout(HttpServletResponse response) {
-        ResponseCookie cookie = ResponseCookie.from("jwtToken", "")
-                .maxAge(0)
-                .path("/")
-                .build();
-        response.addHeader("Set-Cookie", cookie.toString());
-        return new ModelAndView("redirect:/start/login");
+        log.info("[GET] /start/logout - Выход пользователя из системы");
+
+        try {
+            ResponseCookie cookie = ResponseCookie.from("jwtToken", "")
+                    .maxAge(0)
+                    .path("/")
+                    .build();
+            response.addHeader("Set-Cookie", cookie.toString());
+            return new ModelAndView("redirect:/start/login");
+        } catch (Exception e) {
+            log.error("Ошибка при выходе из системы: {}", e.getMessage());
+            return handleError(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
-
-    // Метод для создания JWT cookie
-    private ResponseCookie buildJwtCookie(String token) {
-        return ResponseCookie.from("jwtToken", token)
-                .httpOnly(true)
-                .secure(false) // В production должно быть true
-                .path("/")
-                .maxAge(7 * 24 * 60 * 60) // 7 дней
-                .sameSite("Lax")
-                .build();
-    }
-
-    // Остальные методы (регистрация и валидация) остаются без изменений
+    /* Страница регистрации */
     @Operation(summary = "Страница регистрации")
     @GetMapping("/register")
     public ModelAndView showRegistrationPage() {
-        return new ModelAndView("registration");
+        log.info("[GET] /start/register - Отображение страницы регистрации");
+        return new ModelAndView("register"); // название шаблона страницы регистрации
     }
 
-    @Operation(summary = "Регистрация пользователя")
+    /* Обработка формы регистрации */
+    @Operation(summary = "Регистрация нового пользователя")
     @PostMapping("/register")
-    public ModelAndView signUp(@ModelAttribute @Valid RegistrationDTO registrationDTO) {
-        JwtAuthenticationResponse response = authService.signUp(registrationDTO);
-        ModelAndView modelAndView = new ModelAndView("login");
-        modelAndView.addObject("token", response.getToken());
-        modelAndView.addObject("username", registrationDTO.getUserName());
-        return modelAndView;
+    public ModelAndView registerUser(@ModelAttribute @Valid RegistrationDTO registerDTO) {
+        log.info("[POST] /start/register - Попытка зарегистрировать пользователя {}", registerDTO.getUserName());
+        try {
+            authService.signUp(registerDTO); // ваш сервис должен реализовать регистрацию
+            log.info("Пользователь {} успешно зарегистрирован", registerDTO.getUserName());
+            return new ModelAndView("redirect:/start/login"); // перенаправление на страницу входа
+        } catch (Exception e) {
+            log.error("Ошибка при регистрации: {}", e.getMessage());
+            ModelAndView model = new ModelAndView("register");
+            model.addObject("error", "Ошибка при регистрации: " + e.getMessage());
+            return model;
+        }
+    }
+    // ... остальные методы с аналогичным логированием ...
+
+    /* Обработка ошибок */
+    private ModelAndView handleError(HttpStatus status) {
+        String errorView = ERROR_VIEW_PREFIX + status.value();
+        log.error("Отображение страницы ошибки: {}", errorView);
+
+        ModelAndView model = new ModelAndView(errorView);
+        model.addObject("status", status.value());
+        model.addObject("error", status.getReasonPhrase());
+        return model;
     }
 
-    @Operation(summary = "Валидация токена")
-    @GetMapping("/validate")
-    public ModelAndView validateToken(@RequestParam String token) {
-        String username = jwtService.extractUserName(token);
-        UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-
-        boolean isValid = jwtService.isTokenValid(token);
-        ModelAndView modelAndView = new ModelAndView("validate");
-        modelAndView.addObject("isValid", isValid);
-        modelAndView.addObject("username", username);
-        return modelAndView;
+    @ExceptionHandler(Exception.class)
+    public ModelAndView handleAllExceptions(Exception ex) {
+        log.error("Необработанное исключение: {}", ex.getMessage());
+        return handleError(HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }

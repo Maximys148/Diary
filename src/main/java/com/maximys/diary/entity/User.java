@@ -43,6 +43,7 @@ public class User implements UserDetails {
     @JsonIgnore
     private Email email;
 
+
     @Enumerated(EnumType.STRING)
     @Column(name = "role", nullable = false)
     private Role role;
