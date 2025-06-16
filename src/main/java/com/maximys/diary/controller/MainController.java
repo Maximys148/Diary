@@ -209,4 +209,9 @@ public class MainController {
         log.error("Критическая ошибка: {}", ex.getMessage());
         return handleError(HttpStatus.INTERNAL_SERVER_ERROR);
     }
+    @GetMapping("favicon.ico")
+    @ResponseBody
+    public void returnNoFavicon() {
+        // Пустой метод возвращает 204 No Content
+    }
 }

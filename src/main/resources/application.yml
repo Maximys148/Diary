@@ -17,6 +17,7 @@ spring:
     jdbc:
       dialect: postgresql
   jpa:
+    open-in-view: false
     hibernate:
       ddl-auto: update
   liquibase:
@@ -24,8 +25,8 @@ spring:
 server:
   port: 8091
 jwt:
-  secret: 53A73E5F1C4E0A2D3B5F2D784E6A1B423D6F587D1F6E5C3A596D635A75327855
-  expiration: 300  #
+  secret: K7gNU3sdo+OL0wNhqoVWhr3g6s1xYv72ol/pe/Unols=
+  expiration: 10000000  #милисекунды
   refresh-token-expiration: 1000
 
 # Swagger

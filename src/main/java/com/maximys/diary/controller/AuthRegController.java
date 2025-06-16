@@ -13,6 +13,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.security.core.AuthenticationException;
@@ -22,7 +23,6 @@ import org.springframework.web.servlet.ModelAndView;
 
 @Controller
 @RequestMapping("/start")
-@RequiredArgsConstructor
 @Tag(name = "Аутентификация")
 public class AuthRegController {
     private final AuthService authService;
@@ -31,6 +31,12 @@ public class AuthRegController {
 
 
     private static final String ERROR_VIEW_PREFIX = "error/"; // Префикс для error-страниц
+
+    @Autowired
+    public AuthRegController(AuthService authService, JwtUtil jwtUtil) {
+        this.authService = authService;
+        this.jwtUtil = jwtUtil;
+    }
 
     /* Стартовая страница */
     @Operation(summary = "Стартовая страница")
@@ -139,10 +145,16 @@ public class AuthRegController {
     /* Обработка формы регистрации */
     @Operation(summary = "Регистрация нового пользователя")
     @PostMapping("/register")
-    public ModelAndView registerUser(@ModelAttribute @Valid RegistrationDTO registerDTO) {
+    public ModelAndView registerUser(@ModelAttribute @Valid RegistrationDTO registerDTO, HttpServletResponse response) {
         log.info("[POST] /start/register - Попытка зарегистрировать пользователя {}", registerDTO.getUserName());
         try {
             authService.signUp(registerDTO); // ваш сервис должен реализовать регистрацию
+            // Удаляем старую куку с токеном
+            ResponseCookie cookie = ResponseCookie.from("jwtToken", "")
+                    .maxAge(0)
+                    .path("/")
+                    .build();
+            response.addHeader("Set-Cookie", cookie.toString());
             log.info("Пользователь {} успешно зарегистрирован", registerDTO.getUserName());
             return new ModelAndView("redirect:/start/login"); // перенаправление на страницу входа
         } catch (Exception e) {

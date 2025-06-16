@@ -69,6 +69,7 @@ public class JwtUtil {
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + expirationMillis);
 
+
         return Jwts.builder()
                 .setSubject(username)
                 .setIssuedAt(now)
@@ -127,7 +128,7 @@ public class JwtUtil {
      * Получает секретный ключ для подписи.
      */
     private SecretKey getSigningKey() {
-        byte[] keyBytes = Decoders.BASE64.decode(secret);
+        byte[] keyBytes = Decoders.BASE64.decode(secret); // Декодируем Base64
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
@@ -165,14 +166,14 @@ public class JwtUtil {
      * Создает ResponseCookie для хранения JWT.
      */
     public ResponseCookie buildJwtCookie(String token) {
-        return buildCookie(JWT_COOKIE_NAME, token, lifetime / 1000);
+        return buildCookie(JWT_COOKIE_NAME, token, lifetime);
     }
 
     /**
      * Создает ResponseCookie для refresh-токена.
      */
     public ResponseCookie buildRefreshCookie(String token) {
-        return buildCookie("refreshToken", token, lifetime / 1000);
+        return buildCookie("refreshToken", token, lifetime);
     }
 
     /**
