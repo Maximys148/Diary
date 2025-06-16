@@ -100,13 +100,7 @@
 <script src='https://kit.fontawesome.com/a076d05399.js' crossorigin='anonymous'></script>
 
 <script th:inline="javascript">
-
-    // Передача данных из модели в JS
-    /*[[${events}]]*/
-    /*[[${notifications}]]*/
-
     document.addEventListener('DOMContentLoaded', function() {
-
         // Получаем события и уведомления из модели
         var events = /*[[${events}]]*/ [];
         var notifications = /*[[${notifications}]]*/ [];
@@ -121,18 +115,18 @@
                 center: 'title',
                 right: 'dayGridMonth,timeGridWeek,timeGridDay'
             },
-            events: events.map(function(event) {
+            events: Array.isArray(events) ? events.map(function(event) {
                 return {
-                    title: event.name,
-                    start: event.dateTime,
+                    title: event.name || 'Событие',
+                    start: event.dateTime || new Date(),
                     className: 'busy-day',
-                    allDay:true
+                    allDay: true
                 };
-            }),
-            eventContent:function(arg){
-                return { html:'<div class=\"fc-event-title\">' + arg.event.title + '</div>' };
+            }) : [],
+            eventContent: function(arg) {
+                return { html: '<div class="fc-event-title">' + arg.event.title + '</div>' };
             },
-            dateClick:function(info){
+            dateClick: function(info) {
                 console.log('Clicked on:', info.dateStr);
             }
         });
@@ -153,10 +147,10 @@
 
             if (!hasEvent) {
                 calendar.addEvent({
-                    title:'Свободно',
+                    title: 'Свободно',
                     start: dateStr,
-                    className:'free-day',
-                    allDay:true
+                    className: 'free-day',
+                    allDay: true
                 });
             }
 
@@ -167,44 +161,40 @@
         function updateNotifications() {
             var now = new Date();
 
-            notifications.forEach(function(n){
-                if(n.eventDateTime){
-                    var eventTime = new Date(n.eventDateTime);
-                    var diffMs = eventTime - now; // миллисекунды
-                    if(diffMs > 0){
-                        var diffMinutes = Math.floor(diffMs / (1000 * 60));
-                        n.timeRemaining = diffMinutes + ' минут';
-                    } else{
-                        n.timeRemaining='Прошло';
+            if (Array.isArray(notifications)) {
+                notifications.forEach(function(n) {
+                    if (n.eventDateTime) {
+                        var eventTime = new Date(n.eventDateTime);
+                        var diffMs = eventTime - now; // миллисекунды
+                        if (diffMs > 0) {
+                            var diffMinutes = Math.floor(diffMs / (1000 * 60));
+                            n.timeRemaining = diffMinutes + ' минут';
+                        } else {
+                            n.timeRemaining = 'Прошло';
+                        }
+                    } else {
+                        n.timeRemaining = 'Неизвестно';
                     }
-                } else{
-                    n.timeRemaining='Неизвестно';
-                }
-
-                // Обновляем отображение в списке
-                var listItem = document.querySelector('#notificationsList li[data-id="'+n.id+'"]');
-                if(listItem){
-                    listItem.innerHTML='Уведомление о событии "<strong>' + n.eventName + '</strong>"<br/> Осталось времени до начала: ' + n.timeRemaining;
-                }
-            });
-
-            // Обновляем счетчик уведомлений
-            document.getElementById('notificationCount').innerText=notifications.length;
-
-            // Обновляем список в модальном окне
-            var listContainer=document.getElementById('notificationsList');
-            listContainer.innerHTML='';
-            if(notifications.length===0){
-                document.getElementById('noNotificationsMessage').style.display='block';
-            } else{
-                document.getElementById('noNotificationsMessage').style.display='none';
-                notifications.forEach(function(n){
-                    var li=document.createElement('li');
-                    li.className='list-group-item' + (n.read?'':' font-weight-bold');
-                    li.setAttribute('data-id', n.id);
-                    li.innerHTML='Уведомление о событии "<strong>' + n.eventName + '</strong>"<br/> Осталось времени до начала: ' + n.timeRemaining;
-                    listContainer.appendChild(li);
                 });
+
+                // Обновляем счетчик уведомлений
+                document.getElementById('notificationCount').innerText = notifications.length;
+
+                // Обновляем список в модальном окне
+                var listContainer = document.getElementById('notificationsList');
+                listContainer.innerHTML = '';
+                if (notifications.length === 0) {
+                    document.getElementById('noNotificationsMessage').style.display = 'block';
+                } else {
+                    document.getElementById('noNotificationsMessage').style.display = 'none';
+                    notifications.forEach(function(n) {
+                        var li = document.createElement('li');
+                        li.className = 'list-group-item' + (n.read ? '' : ' font-weight-bold');
+                        li.setAttribute('data-id', n.id || '');
+                        li.innerHTML = 'Уведомление о событии "<strong>' + (n.eventName || '') + '</strong>"<br/> Осталось времени до начала: ' + (n.timeRemaining || '');
+                        listContainer.appendChild(li);
+                    });
+                }
             }
         }
 
@@ -213,7 +203,6 @@
 
         // Можно установить интервал для периодического обновления времени (например, каждую минуту)
         setInterval(updateNotifications, 60000);
-
     });
 </script>
 
