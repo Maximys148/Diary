@@ -1,4 +1,4 @@
-# 📔 Diary - Система управления записями
+# 📒 Diary - Система управления записями
 
 ![Java](https://img.shields.io/badge/Java-17-ED8B00?logo=openjdk&logoColor=white)
 ![Spring Boot](https://img.shields.io/badge/Spring_Boot-3.3.3-6DB33F?logo=springboot)
